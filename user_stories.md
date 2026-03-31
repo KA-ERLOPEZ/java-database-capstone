@@ -89,3 +89,5 @@ _Como administrador, quiero ejecutar un procedimiento almacenado en MySQL para o
 
 **Notas:**
 - Evaluar visualización mediante gráficos.
+
+
