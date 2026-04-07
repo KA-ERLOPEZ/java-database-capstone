@@ -2,11 +2,15 @@ package com.project.back_end.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 @Entity
 @Table(name= "patient")
 public class Patient {
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
     @NotNull
@@ -19,6 +23,7 @@ public class Patient {
 
     @Size(min = 6)
     @NotNull
+    @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Pattern(regexp = "\\d{10}")

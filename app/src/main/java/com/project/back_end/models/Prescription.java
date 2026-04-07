@@ -1,13 +1,14 @@
 package com.project.back_end.models;
 
 import jakarta.validation.constraints.*;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "prescriptions")
 public class Prescription {
 
     @Id
-    private long id;
+    private String id;
 
     @Size(min = 3, max = 100)
     private String patientName;
@@ -25,11 +26,11 @@ public class Prescription {
     @Size(max = 200)
     private String doctorNotes;
 
-    public long getId(){
+    public String getId(){
         return id;
     }
 
-    public void setId(long id){
+    public void setId(String id){
         this.id = id;
     }
 

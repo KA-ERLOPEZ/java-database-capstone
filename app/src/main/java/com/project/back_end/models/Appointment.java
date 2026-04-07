@@ -2,6 +2,7 @@ package com.project.back_end.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

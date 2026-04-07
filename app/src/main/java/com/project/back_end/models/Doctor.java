@@ -3,12 +3,18 @@ package com.project.back_end.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
+
 @Entity
 @Table(name= "doctor")
 public class Doctor {
 
     @Id
-    @GeneratedValue(strategy= GenarationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
     @Size(min = 3, max = 100)
@@ -17,7 +23,7 @@ public class Doctor {
 
     @Size(min = 3, max = 50)
     @NotNull
-    private String speciality;
+    private String specialty;
 
     @Email
     @NotNull
@@ -26,7 +32,6 @@ public class Doctor {
     @Size(min= 6)
     @NotNull
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private String password;
 
     @Pattern(regexp = "\\d{10}", message = "El número de teléfono debe tener 10 dígitos")
@@ -51,12 +56,12 @@ public class Doctor {
         this.name = name;
     }
 
-    public String getSpeciality(){
-        return speciality;
+    public String getSpecialty(){
+        return specialty;
     }
 
-    public void setSpeciality(String speciality){
-        this.speciality = speciality;
+    public void setSpeciality(String specialty){
+        this.specialty = specialty;
     }
 
     public String getEmail(){
@@ -72,7 +77,7 @@ public class Doctor {
         return password;
     }
 
-    private void setPassword(Stirng password){
+    private void setPassword(String password){
         this.password = password;
     }
 
