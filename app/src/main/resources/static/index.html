@@ -1,6 +1,80 @@
 <!-- index.html -->
-<!-- 
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--Character encoding-->
+        <meta chareset="UTF-8">
 
+        <!--Page title-->
+        <title>Select Role</title>
+        
+        <!--Favicon-->
+        <link rel="icon" href="../assets/images/logo/Logo.png">
+
+        <!--Stylesheets-->
+        <link rel="stylesheet" href="./assets/css/index.css">
+        <link rel="stylesheet" href="./assets/css/style.css">
+
+        <!--Javascript File-->
+         <script src="../js/util.js" defer></script>
+         <script src="../js/render.js" defer></script>
+         <script src="../js/components/header.js" defer></script>
+         <script src="../js/components/footer.js" defer></script>
+     
+    </head>
+    <body>
+        <!--Main container-->
+        <div class="container">
+
+            <!--Wrapper-->
+            <div class="wrapper">
+                <!--Header Placeholder-->
+                <div id="header"></div>
+
+                <!--Main content-->
+                <main class="main-content">
+                    <h2>Select your Role</h2>
+
+                    <button id="admin-btn" class="role-btn">
+                        Admin
+                    </button>
+
+                    <button id="patient-btn" class="role-btn">
+                        Patient
+                    </button>
+
+                    <button id="doctor-btn" class="role-btn">
+                        Doctor
+                    </button>
+
+                </main>
+
+                <!--Footer Placeholder-->
+                <div id="footer"></div>
+            </div>
+        </div>
+        
+        <!-- Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+
+        <div class="modal">
+
+            <button id="close-modal" class="close-btn">
+                &times;
+            </button>
+
+            <!-- Dynamic Modal Content -->
+            <div id="modal-content"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Page Logic -->
+    <script type="module" src="../js/index.js"></script>
+    </body>
+</html>
+<!-- 
 Step-by-Step Explanation of `index.html`.
 This file allows users to select a role (Admin, Patient, Doctor) 
 and triggers modal-based login functionality.
