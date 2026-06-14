@@ -1,4 +1,48 @@
 <!-- doctorDashboard.html -->
+<!DOCTYPE html>
+ <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="icon" type="image/png" th:href="@{/assets/images/logo/logo.png}" />
+        <title>Doctor Dashboard</title>
+        <link rel="stylesheet" th:href="@{assets/css/doctorDashboard.css}">
+        <link rel="stylesheet" th:href="@{assets/css/adminDashboard.css}">
+        <link rel="stylesheet" th:href="@{assets/css/style.css}">
+        <script th:src="@{/js/render.js}"></script>
+        <script th:src="@{/js/util.js}"></script>
+        <script th:src="@{/js/doctorDashboard.js}" defer></script>
+        <script th:src="@{/js/components/header.js}" derfer></script>
+        <script th:src="@{/js/components/footer.js}" derfer></script>
+    </head>
+    <body onload="renderConternt()">
+        <div class="container">
+            <div class="wrapper">
+                <div id="header"></div>
+                <div class="main-content">
+                    <input type="text" id="searchBar" class="searchBar" placeholder="Search Bar for custom output" />
+                    <button id="todayButton" type="button">
+                        Today's appointments
+                    </button>
+                    <input id="datePicker" type="date"/>
+
+                    <!--Patient table-->
+                    <table id="patientTable">
+                        <thead>
+                            <tr>    
+                                <th>Patient ID</th>
+                                <th>Name Phone No</th>
+                                <th>Email </th>
+                                <th>Prescription</th> 
+                            </tr>
+                        </thead>
+                        <tbody id="patientTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="footer"></div>
+            </div>
+        </div>
+    </body>
+ </html>
 
 <!-- 
 Step-by-Step Explanation of `doctorDashboard.html`
@@ -99,3 +143,5 @@ This file defines the Doctor Dashboard interface, allowing doctors to view and m
 
     * Properly close the `<body>` and `<html>` tags to complete the document.
  -->
+
+ 
