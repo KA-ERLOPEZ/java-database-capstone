@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "../config/config";
 
 
-const DOCTOR_API = API_BASE_URL + '/doctor'
+const DOCTOR_API = API_BASE_URL + '/doctor';
 
 
 /*
@@ -24,11 +24,11 @@ async function getDoctors() {
         if (response.ok) {
             return await response.json();
         }
-        alert("The data could not be obtained")
+        alert("The data could not be obtained");
         return [];
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.")
+        alert("Something went wrong. Please try again.");
         return [];
     }
 }
@@ -47,23 +47,27 @@ async function getDoctors() {
 async function deleteDoctor(id, token) {
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${id}`, {
+        const response = await fetch(`${DOCTOR_API}/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer${token}`,
-                'Content-type': 'application-json'
+                'Content-type': 'application/json'
             }
         });
 
         if (response.ok) {
-            alert(response.json())
+            const data = await response.json();
+            alert("Delete doctor successfuly: ", data.message);
+            return true;
         } else {
-            alert("The record could not be deleted")
+            alert("The record could not be deleted");
+            return false;
         }
 
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.")
+        alert("Something went wrong. Please try again.");
+        return false;
     }
 
 }
@@ -87,28 +91,29 @@ Purpose: Save (create) a new doctor using a POST request
   async function saveDoctor(doctor, token){
 
     try {
-        const response = await fetch(API_BASE_URL,{
+        const response = await fetch(DOCTOR_API,{
         method:'POST',
         headers:{
             'Authorization':`Bearer ${token}`,
-            'Content-type':'application-json'
+            'Content-type':'application/json'
         },
         body: JSON.stringify(doctor)
     });
     if (response.ok) {
         const data = await response.json();
         alert("Doctor saving  successfuly: ", data.message);
+        return true;
     } else {
-        alert("Error saving the doctor")
+        alert("Error saving the doctor");
+        return false;
     }
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.")
+        alert("Something went wrong. Please try again.");
+        return false;
     }
   }
  /*
-
-
 Function: filterDoctors
 Purpose: Fetch doctors based on filtering criteria (name, time, and specialty)
 
@@ -120,3 +125,31 @@ Purpose: Fetch doctors based on filtering criteria (name, time, and specialty)
 
  Catch any other errors, alert the user, and return a default empty result
 */
+async function filterDoctors(filters={}, token){
+
+    const params = new URLSearchParams(filters).toString();
+    const urlWithParams = params?`${DOCTOR_API}?${params}`:DOCTOR_API;
+
+    try {
+        const response = await fetch(urlWithParams, {
+            method:'GET',
+            headers:{
+                'Authorization': `Bearer ${token}`,
+                'Content-type': 'application/json'
+            }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        
+        alert("The data could not be obtained");
+        return [];
+    } catch (error) {
+        console.error(" error:", error);
+        alert("Something went wrong. Please try again.");
+        return [];
+        
+    }
+
+     
+}
