@@ -24,11 +24,12 @@ async function getDoctors() {
         if (response.ok) {
             return await response.json();
         }
-        alert("The data could not be obtained");
+        //alert("The data could not be obtained");
+        console.log("The data could not be obtained");
         return [];
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.");
+       // alert("Something went wrong. Please try again.");
         return [];
     }
 }
@@ -57,17 +58,17 @@ async function deleteDoctor(id, token) {
 
         if (response.ok) {
             const data = await response.json();
-            alert("Delete doctor successfuly: ", data.message);
-            return true;
+           // alert("Delete doctor successfuly: ", data.message);
+            return {'success':true, 'message': data.message};
         } else {
-            alert("The record could not be deleted");
-            return false;
+            //alert("The record could not be deleted");
+            return {'success':false, 'message': data.message};;
         }
 
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.");
-        return false;
+       // alert("Something went wrong. Please try again.");
+        return error;
     }
 
 }
@@ -101,16 +102,16 @@ Purpose: Save (create) a new doctor using a POST request
     });
     if (response.ok) {
         const data = await response.json();
-        alert("Doctor saving  successfuly: ", data.message);
-        return true;
+       // alert("Doctor saving  successfuly: ", data.message);
+        return {'success': true, 'message': data.message};
     } else {
-        alert("Error saving the doctor");
-        return false;
+        //alert("Error saving the doctor");
+        return {'success':false, 'message': data.message};;
     }
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.");
-        return false;
+        //alert("Something went wrong. Please try again.");
+        return error;
     }
   }
  /*
@@ -146,7 +147,7 @@ async function filterDoctors(filters={}, token){
         return [];
     } catch (error) {
         console.error(" error:", error);
-        alert("Something went wrong. Please try again.");
+        //alert("Something went wrong. Please try again.");
         return [];
         
     }

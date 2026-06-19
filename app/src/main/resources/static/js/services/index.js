@@ -67,7 +67,7 @@ window.dotorLoginHandler = async function () {
             body: JSON.stringify(doctorCredentials)
         });
         if (response.ok) {
-            const data = response.json();
+            const data = await response.json();
 
             localStorage("token", data.token);
             localStorage("userRole", "doctor");
