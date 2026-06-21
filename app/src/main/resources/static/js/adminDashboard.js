@@ -1,18 +1,28 @@
+
+import {openModal} from '../js/components/modals.js';
+import {getDoctors} from '../js/services/doctorServices.js'
 /*
   This script handles the admin dashboard functionality for managing doctors:
   - Loads all doctor cards
   - Filters doctors by name, time, or specialty
   - Adds a new doctor via modal form
 
-
   Attach a click listener to the "Add Doctor" button
   When clicked, it opens a modal form using openModal('addDoctor')
-
-
+*/
+const addDoctorBtn = document.getElementById('addDocBtn');
+if(addDoctorBtn){
+    addDoctorBtn.addEventListener('click', ()=>{
+        openModal('addDoctor');
+    });
+}
+/*
   When the DOM is fully loaded:
     - Call loadDoctorCards() to fetch and display all doctors
+*/
+document.addEventListener("DOMContentLoaded", ()=>{loadDoctorCards()});
 
-
+/*
   Function: loadDoctorCards
   Purpose: Fetch all doctors and display them as cards
 
@@ -23,8 +33,12 @@
     - Append it to the content div
 
     Handle any fetch errors by logging them
-
-
+*/
+async function loadDoctorCards(){
+    const doctors = getDoctors();
+    const 
+}
+/*
   Attach 'input' and 'change' event listeners to the search bar and filter dropdowns
   On any input change, call filterDoctorsOnChange()
 
