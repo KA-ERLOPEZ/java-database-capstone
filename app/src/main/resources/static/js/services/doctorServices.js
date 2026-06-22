@@ -154,3 +154,9 @@ async function filterDoctors(filters={}, token){
 
      
 }
+
+export {
+    saveDoctor,
+    getDoctors,
+    filterDoctors
+};

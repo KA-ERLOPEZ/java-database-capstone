@@ -1,6 +1,7 @@
 
-import {openModal} from '../js/components/modals.js';
-import {getDoctors} from '../js/services/doctorServices.js'
+import { openModal } from './components/modals.js';
+import { getDoctors, filterDoctors, saveDoctor } from './services/doctorServices.js';
+import { createDoctorCard } from './components/doctorCard.js';
 /*
   This script handles the admin dashboard functionality for managing doctors:
   - Loads all doctor cards
@@ -11,8 +12,8 @@ import {getDoctors} from '../js/services/doctorServices.js'
   When clicked, it opens a modal form using openModal('addDoctor')
 */
 const addDoctorBtn = document.getElementById('addDocBtn');
-if(addDoctorBtn){
-    addDoctorBtn.addEventListener('click', ()=>{
+if (addDoctorBtn) {
+    addDoctorBtn.addEventListener('click', () => {
         openModal('addDoctor');
     });
 }
@@ -20,7 +21,7 @@ if(addDoctorBtn){
   When the DOM is fully loaded:
     - Call loadDoctorCards() to fetch and display all doctors
 */
-document.addEventListener("DOMContentLoaded", ()=>{loadDoctorCards()});
+document.addEventListener("DOMContentLoaded", () => { loadDoctorCards() });
 
 /*
   Function: loadDoctorCards
@@ -34,15 +35,40 @@ document.addEventListener("DOMContentLoaded", ()=>{loadDoctorCards()});
 
     Handle any fetch errors by logging them
 */
-async function loadDoctorCards(){
-    const doctors = getDoctors();
-    const 
+async function loadDoctorCards() {
+    try {
+        const doctors = await getDoctors();
+        const contentDiv = document.getElementById('content');
+
+        contentDiv.innerHTML = "";
+
+        doctors.array.forEach(doctor => {
+            const doctorCard = createDoctorCard(doctor);
+            contentDiv.appendChild(doctorCard);
+        });
+    } catch (error) {
+        console.log('Error loading dorctors', error)
+    }
 }
 /*
   Attach 'input' and 'change' event listeners to the search bar and filter dropdowns
   On any input change, call filterDoctorsOnChange()
+*/
+const serchBar = document.getElementById('searchBar')
+const filterTime = document.getElementById('filterTime')
+const filterSpecialty = document.getElementById('filterSpecialty')
+if (serchBar) {
+    serchBar.addEventListener('input', filterDoctorsOnChange);
+}
 
+if (filterTime) {
+    filterTime.addEventListener('change', filterDoctorsOnChange);
+}
 
+if (filterSpecialty) {
+    filterSpecialty.addEventListener('change', filterDoctorsOnChange);
+}
+/*
   Function: filterDoctorsOnChange
   Purpose: Filter doctors based on name, available time, and specialty
 
@@ -56,14 +82,52 @@ async function loadDoctorCards(){
     - Show a message: "No doctors found with the given filters."
 
     Catch and display any errors with an alert
+*/
+async function filterDoctorsOnChange() {
+    try {
+        const name = serchBar?.value.trim() || null;
+        const time = filterTime?.value || null;
+        const specialty = filterSpecialty?.value || null;
+        const token = localStorage.getItem('token');
+        const doctors = await filterDoctors({ name, time, specialty }, token);
 
+        const contentDiv = document.getElementById("content");
+        content.innerHTML = "";
 
+        if (doctors.length > 0) {
+            renderDoctorCards(doctors);
+        } else {
+            contentDiv.innerHTML = `
+                <p class="noDoctorMessage">
+                    No doctors found with the given filters.
+                </p>
+            `
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error adding doctor.");
+
+    }
+}
+/*
   Function: renderDoctorCards
   Purpose: A helper function to render a list of doctors passed to it
 
     Clear the content area
     Loop through the doctors and append each card to the content area
 
+*/
+function renderDoctorCards(doctors) {
+    const content = document.getElementById("content");
+
+    content.innerHTML = "";
+
+    doctors.forEach((doctor) => {
+        const doctorCard = createDoctorCard(doctor);
+        content.appendChild(doctorCard);
+    });
+}
+/*
 
   Function: adminAddDoctor
   Purpose: Collect form data and add a new doctor to the system
@@ -84,3 +148,55 @@ async function loadDoctorCards(){
 
     If saving fails, show an error message
 */
+
+window.adminAddDoctor = async function () {
+
+    const name =
+        document.getElementById("doctorName").value;
+
+    const email =
+        document.getElementById("doctorEmail").value;
+
+    const phone =
+        document.getElementById("doctorPhone").value;
+
+    const password =
+        document.getElementById("doctorPassword").value;
+
+    const specialization =
+        document.getElementById("doctorSpecialization").value;
+
+    const availableTimes =
+        document.getElementById("doctorAvailableTimes")
+            .value
+            .split(",")
+            .map(time => time.trim());
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Authentication token not found.");
+        return;
+    }
+
+    const doctor = {
+        name,
+        email,
+        phone,
+        password,
+        specialization,
+        availableTimes
+    };
+
+    try {
+        await saveDoctor(doctor, token);
+
+        alert("Doctor added successfully.");
+
+        window.location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert("Error adding doctor.");
+    }
+};
