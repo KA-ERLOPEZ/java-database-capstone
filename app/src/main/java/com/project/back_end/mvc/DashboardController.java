@@ -2,8 +2,12 @@ package com.project.back_end.mvc;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+//import org.springframework.ui.Model;
 
 import com.project.back_end.services.Service;
 
@@ -31,7 +35,12 @@ public class DashboardController {
     // - If invalid, redirects to the root URL, likely the login or home page.
     @GetMapping("/adminDashboard/{token}")
     public String adminDashboard(@PathVariable String token){
-        boolean isValidToken = service.valdateToken(token, "admin");
+        Map validateToken = service.valdateToken(token, "admin");
+
+        if(!validateToken.isEmpty()){
+            return "http://localhost:8080";
+        }
+        return "admin/adminDashboard";
     } 
 
     // 4. Define the `doctorDashboard` Method:
@@ -41,5 +50,14 @@ public class DashboardController {
     // - If the token is valid, forwards the user to the `"doctor/doctorDashboard"`
     // view.
     // - If the token is invalid, redirects to the root URL.
+    public String doctorDashboard(@PathVariable String token){
+        Map validateToken = service.validateToken(token, "doctor");
+
+        if(!validateToken.isEmpty()){
+            return "http://localhost:8080";
+        }
+
+        return "doctor/doctorDashboard";
+    }
 
 }
