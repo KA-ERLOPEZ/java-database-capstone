@@ -1,12 +1,20 @@
 package com.project.back_end.services;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springFramework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import com.project.back_end.models.Appointment;
+import com.project.back_end.models.Doctor;
+import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
@@ -75,27 +83,28 @@ public class AppointmentService {
     // returns an appropriate error message.
     // - Instruction: Ensure proper validation and error handling is included for
     // appointment updates.
+    @Transactional
     public ResponseEntity <Map<String, String>> updateAppointment (Appointment appointment){
 
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointment.getId);
 
         if(optionalAppointment.isEmpty()){
-            return Map.of("Success", false, "Message", "Appointment not found");
+            return Map.of("Message", "Appointment not found");
         }
 
         int validateAppointment= service.validateAppointment(appointment);
 
         if(validateAppointment == 0){
-            return Map.of("Success", false, "Message", "Appointment not available");
+            return Map.of( "Message", "Appointment not available");
         }
 
         if(validateAppointment == -1){
-            return Map.of("Success", false, "Message", "Doctor does not exist");
+            return Map.of("Message", "Doctor does not exist");
         }
 
         appointmentRepository.save(appointment);
 
-        return Map.of("Success", true, "Message", "Appointment successfully registered");
+        return Map.of("Message", "Appointment successfully registered");
 
 
     }
@@ -106,8 +115,30 @@ public class AppointmentService {
     // handles possible errors.
     // - Instruction: Make sure that the method checks for the patient ID match
     // before deleting the appointment.
-    public ResponseEntity<Map<String, String>> cancelAppointment(Long id){
+    // 6. **Método para cancelar una cita**:
+    // - Este método cancela una cita eliminándola de la base de datos.
+    // - Verifica que quien intenta cancelar la cita sea el paciente titular de la misma y
+    // gestiona los posibles errores.
+    // - Instrucción: Asegúrate de que el método valide la coincidencia del ID del paciente
+    // antes de eliminar la cita.
+    @Transactional
+    public ResponseEntity<Map<String, String>> cancelAppointment(Long id, String token){
+        String emailToken = tokenService.extractEmail(token);
+        Patient patient = patientRepository.findByEmail(emailToken);
+        Appointment optionalAppointment = appointmentRepository.findById(id);
 
+        if (optionalAppointment.isEmpty()) {
+            return new ResponseEntity<>(Map.of("Message", "Appointment not found"));
+        }
+
+        if (optionalAppointment.getPatient().getId() !=  patient.getId) {
+
+            return new ResponseEntity<>(Map.of("Message", "User unauthorized"));
+        }
+
+        appointmentRepository.delete(optionalAppointment);
+
+        return new ResponseEntity<>(Map.of("Message", "Appointment deleted succesfully"));
     }
 
     // 7. **Get Appointments Method**:
@@ -117,6 +148,23 @@ public class AppointmentService {
     // and handled in a single transaction.
     // - Instruction: Ensure the correct use of transaction boundaries, especially
     // when querying the database for appointments.
+    @Transactional
+    public Map<String, Object> getAppointments (String pname, LocalDate date, String token){
+        String tokenEmail = tokenService.extractEmail(token);
+        Doctor doctor = doctorRepository.findByEmail(tokenEmail);
+
+        List<Appointment> appointments = new Appointment<>();
+        if (Objects.isNull(pname)) {
+
+            appointments.addAll(appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctor.getId(), date.atStartOfDay(), date.atStartOfDay));
+
+        }else{
+            appointments.addAll(appointmentRepository.findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(doctor.getId(), pname, date.atStartOfDay(), date.atStartOfDay()));
+        }
+
+        return Map.of("appointments", appointments);
+        
+    }
 
     // 8. **Change Status Method**:
     // - This method updates the status of an appointment by changing its value in
@@ -125,5 +173,14 @@ public class AppointmentService {
     // executed in a single transaction.
     // - Instruction: Add `@Transactional` before this method to ensure atomicity
     // when updating appointment status.
+    @Transactional
+    public Map<String, Boolean> changeStatus(int status, Long id){
+        try {
+            appointmentRepository.updateStatus(status, id);4
+            return Map.of("Success", true);
+        } catch (Exception e) {
+            return Map.of("Success", false);
+        }
+    }
 
 }
