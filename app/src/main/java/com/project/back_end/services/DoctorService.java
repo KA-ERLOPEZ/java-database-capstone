@@ -1,9 +1,13 @@
 package com.project.back_end.services;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.ArrayList; 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +39,9 @@ public class DoctorService {
     private TokenService tokenService;
 
     public DoctorService(
-        DoctorRepository doctorRepository,
-        AppointmentRepository appointmentRepository,
-        TokenService tokenService
-    ){
+            DoctorRepository doctorRepository,
+            AppointmentRepository appointmentRepository,
+            TokenService tokenService) {
         this.doctorRepository = doctorRepository;
         this.appointmentRepository = appointmentRepository;
         this.tokenService = tokenService;
@@ -59,15 +62,25 @@ public class DoctorService {
     // calculates the availability by comparing against booked slots.
     // - Instruction: Ensure that the time slots are properly formatted and the
     // available slots are correctly filtered.
-    @Transactional
-    public List<String> getDoctorAvailability(Long doctorId, LocalDate date){
+    @Transactional(readOnly = true)
+    public List<String> getDoctorAvailability(Long doctorId, LocalDate date) {
 
         Optional<Doctor> doctor = doctorRepository.findById(doctorId);
-        List<String> availabilityTimes = new ArrayList <>(); 
-        if(doctor.isPresent()){
-            List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, date.atStartOfDay().plusHours(8), date.atStartOfDay().plusHours(17));
-            
+
+        // Retornamos una lista vacia si no se encuentra el docor
+        if (doctor.isEmpty()) {
+            return Collections.emptyList();
+
         }
+
+        List<Appointment> appointements = appointmentRepository
+                .findByDoctorIdAndAppointmentTimeBetween(doctorId,
+                        date.atStartOfDay().plusHours(8),
+                        date.atStartOfDay().plusHours(17));
+        Set<String> takenTimes = appointements.stream().map(Appointment::getAppointmentTimeOnly)
+                .map(dateTime -> dateTime.toString()).collect(Collectors.toSet());
+
+        return doctor.get().getAllAvailableTimes().stream().filter(time -> !takenTimes.contains(time)).toList();
     }
 
     // 5. **saveDoctor Method**:
