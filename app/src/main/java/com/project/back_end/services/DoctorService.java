@@ -3,15 +3,20 @@ package com.project.back_end.services;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.print.Doc;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
 import com.project.back_end.repo.AppointmentRepository;
@@ -90,18 +95,58 @@ public class DoctorService {
     // conflict; `1` for success, and `0` for internal errors.
     // - Instruction: Ensure that the method correctly handles conflicts and
     // exceptions when saving a doctor.
+    public int saveDoctor(Doctor doctor) {
+        try {
+            Doctor findDoctorByEmail = doctorRepository.findByEmail(doctor.getEmail());
+            if (Objects.isNull(findDoctorByEmail)) {
+                return -1;
+            }
+
+            doctorRepository.save(doctor);
+            return 1;
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            return 0;
+
+        }
+    }
 
     // 6. **updateDoctor Method**:
     // - Updates an existing doctor's details in the database. If the doctor doesn't
     // exist, it returns `-1`.
     // - Instruction: Make sure that the doctor exists before attempting to save the
     // updated record and handle any errors properly.
+    public int updateDoctor(Doctor doctor) {
+        try {
+            Optional<Doctor> existDoctor = doctorRepository.findById(doctor.getId());
+
+            if (existsDoexistDoctor.isEmpty()) {
+                return -1;
+            }
+
+            doctorRepository.save(doctor);
+            return 1;
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            return 0;
+        }
+    }
 
     // 7. **getDoctors Method**:
     // - Fetches all doctors from the database. It is marked with `@Transactional`
     // to ensure that the collection is properly loaded.
     // - Instruction: Ensure that the collection is eagerly loaded, especially if
     // dealing with lazy-loaded relationships (e.g., available times).
+    @Transactional(readOnly = true)
+    public List<Doctor> getDoctors(){
+
+        List<Doctor> doctors = doctorRepository.findAll();
+        doctors.forEach(doctor -> doctor.getAllAvailableTimes().size());
+        return doctors;
+    }
+
 
     // 8. **deleteDoctor Method**:
     // - Deletes a doctor from the system along with all appointments associated
@@ -110,7 +155,21 @@ public class DoctorService {
     // it deletes the doctor and their appointments.
     // - Instruction: Ensure the doctor and their appointments are deleted properly,
     // with error handling for internal issues.
+    public int delecteDoctor(Long id){
+        try {
+            Optional<Doctor> existDoctor = doctorRepository.findById(id);
+            if (existDoctor.isEmpty()) {
+                return -1;
+            }
 
+            doctorRepository.delete(existDoctor.get());
+            return 1;
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            return 0;
+        }
+    }
     // 9. **validateDoctor Method**:
     // - Validates a doctor's login by checking if the email and password match an
     // existing doctor record.
@@ -118,6 +177,14 @@ public class DoctorService {
     // returns an error message.
     // - Instruction: Make sure to handle invalid login attempts and password
     // mismatches properly with error responses.
+    public Map<String, String> validateDoctor (Login login){
+
+        Doctor doctor = doctorRepository.findByEmail(login.getEmail());
+
+        if (Objects.isNull(doctor)) {
+            return Map.of("Message", "Email or password invalid");
+        }
+    }
 
     // 10. **findDoctorByName Method**:
     // - Finds doctors based on partial name matching and returns the list of
