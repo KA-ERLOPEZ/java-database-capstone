@@ -176,7 +176,7 @@ public class AppointmentService {
     @Transactional
     public Map<String, Boolean> changeStatus(int status, Long id){
         try {
-            appointmentRepository.updateStatus(status, id);4
+            appointmentRepository.updateStatus(status, id);
             return Map.of("Success", true);
         } catch (Exception e) {
             return Map.of("Success", false);

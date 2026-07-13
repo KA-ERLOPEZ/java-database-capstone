@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -140,13 +141,12 @@ public class DoctorService {
     // - Instruction: Ensure that the collection is eagerly loaded, especially if
     // dealing with lazy-loaded relationships (e.g., available times).
     @Transactional(readOnly = true)
-    public List<Doctor> getDoctors(){
+    public List<Doctor> getDoctors() {
 
         List<Doctor> doctors = doctorRepository.findAll();
         doctors.forEach(doctor -> doctor.getAllAvailableTimes().size());
         return doctors;
     }
-
 
     // 8. **deleteDoctor Method**:
     // - Deletes a doctor from the system along with all appointments associated
@@ -155,7 +155,7 @@ public class DoctorService {
     // it deletes the doctor and their appointments.
     // - Instruction: Ensure the doctor and their appointments are deleted properly,
     // with error handling for internal issues.
-    public int delecteDoctor(Long id){
+    public int delecteDoctor(Long id) {
         try {
             Optional<Doctor> existDoctor = doctorRepository.findById(id);
             if (existDoctor.isEmpty()) {
@@ -170,6 +170,7 @@ public class DoctorService {
             return 0;
         }
     }
+
     // 9. **validateDoctor Method**:
     // - Validates a doctor's login by checking if the email and password match an
     // existing doctor record.
@@ -177,13 +178,38 @@ public class DoctorService {
     // returns an error message.
     // - Instruction: Make sure to handle invalid login attempts and password
     // mismatches properly with error responses.
-    public Map<String, String> validateDoctor (Login login){
+    public Map<String, String> validateDoctor(Login login) {
 
         Doctor doctor = doctorRepository.findByEmail(login.getEmail());
 
         if (Objects.isNull(doctor)) {
             return Map.of("Message", "Email or password invalid");
         }
+
+        if (doctor.isAccountLocked()) {
+            return Map.of("Message", "User locked");
+        }
+
+        if (!doctor.getPassword().equals(login.getPassword())) {
+
+            int updatedAttempts = doctor.getFailedAttempts() + 1;
+            doctor.setFailedAttempts(updatedAttempts);
+
+            if (updatedAttempts >= 3) {
+                doctor.setAccountLocked(true);
+            }
+
+            doctorRepository.save(doctor);
+
+            return Map.of("Message", "Email or password invalid");
+        }
+
+        doctor.setFailedAttempts(0);
+        doctorRepository.save(doctor);
+
+        String token = tokenService.generateToken(doctor.getEmail());
+
+        return Map.of("Token", token);
     }
 
     // 10. **findDoctorByName Method**:
@@ -194,6 +220,11 @@ public class DoctorService {
     // - Instruction: Ensure that available times are eagerly loaded for the
     // doctors.
 
+    public Map<String, Object> findDoctorByName(String name) {
+        List<Doctor> doctors = doctorRepository.findByNameLike(name);
+        return Map.of("Doctors", doctors);
+    }
+
     // 11. **filterDoctorsByNameSpecilityandTime Method**:
     // - Filters doctors based on their name, specialty, and availability during a
     // specific time (AM/PM).
@@ -201,6 +232,23 @@ public class DoctorService {
     // filters them based on their availability during the specified time period.
     // - Instruction: Ensure proper filtering based on both the name and specialty
     // as well as the specified time period.
+    public Map<String, Object> filterDoctorsByNameSpecialtyAndTime(String name, String specialty, String amOrPm) {
+        // 1. Buscar doctores por nombre y especialidad en la Base de Datos
+        List<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
+
+        // 2. Filtrar en memoria según el bloque horario seleccionado (AM o PM)
+        List<Doctor> filteredDoctors = doctors.stream()
+                .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
+                .toList();
+
+        // 3. Construir la respuesta estructurada en el mapa
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctors", filteredDoctors);
+        response.put("total", filteredDoctors.size());
+        response.put("timeSlotRequested", amOrPm);
+
+        return response;
+    }
 
     // 12. **filterDoctorByTime Method**:
     // - Filters a list of doctors based on whether their available times match the
@@ -217,12 +265,44 @@ public class DoctorService {
     // - Instruction: Ensure that the method correctly filters doctors based on the
     // given name and time of day (AM/PM).
 
+    public Map<String, Object> filterDoctorByNameAndTime(String name, String amOrPm) {
+        // 1. Buscar doctores por nombre en la Base de Datos (Ignorando
+        // mayúsculas/minúsculas)
+        List<Doctor> doctors = doctorRepository.findByNameLike(name);
+
+        // 2. Filtrar en memoria según el bloque horario (AM o PM)
+        List<Doctor> filteredDoctors = doctors.stream()
+                .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
+                .toList();
+
+        // 3. Construir el mapa de retorno con los resultados
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctors", filteredDoctors);
+        return response;
+    }
+
     // 14. **filterDoctorByNameAndSpecility Method**:
     // - Filters doctors by name and specialty.
     // - It ensures that the resulting list of doctors matches both the name
     // (case-insensitive) and the specified specialty.
     // - Instruction: Ensure that both name and specialty are considered when
     // filtering doctors.
+    public Map<String, Object> filterDoctorByNameAndSpecility(String name, String speciality) {
+
+        List<Doctor> doctors = doctorRepository
+                .findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, speciality);
+
+        Map<String, Object> doctorMap = new HashMap<>();
+
+        if (doctors.isEmpty()) {
+            doctorMap.put("Message", "No doctors found.");
+            return doctorMap;
+        }
+
+        doctorMap.put("Doctors", doctors);
+
+        return doctorMap;
+    }
 
     // 15. **filterDoctorByTimeAndSpecility Method**:
     // - Filters doctors based on their specialty and availability during a specific
@@ -231,6 +311,22 @@ public class DoctorService {
     // their available time slots for AM/PM.
     // - Instruction: Ensure the time filtering is accurately applied based on the
     // given specialty and time period (AM/PM).
+    public Map<String, Object> filterDoctorByTimeAndSpecility(String specialty, String amOrPm) {
+        // 1. Buscar doctores por especialidad en la Base de Datos
+        List<Doctor> doctors = doctorRepository.findBySpecialtyIgnoreCase(specialty);
+    
+        // 2. Filtrar en memoria según el bloque horario (AM o PM)
+        List<Doctor> filteredDoctors = doctors.stream()
+                .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
+                .toList();
+    
+        // 3. Construir el mapa de retorno con los resultados
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctors", filteredDoctors);
+
+    
+        return response;
+    }
 
     // 16. **filterDoctorBySpecility Method**:
     // - Filters doctors based on their specialty.
@@ -238,6 +334,26 @@ public class DoctorService {
     // returns them.
     // - Instruction: Make sure the filtering logic works for case-insensitive
     // specialty matching.
+    public Map<String, Object> filterDoctorBySpecialty(String specialty) {
+
+        Map<String, Object> response = new HashMap<>();
+    
+        String normalizedSpecialty =
+                specialty == null ? "" : specialty.trim();
+    
+        List<Doctor> doctors =
+                doctorRepository.findBySpecialtyIgnoreCase(normalizedSpecialty);
+    
+        if (doctors.isEmpty()) {
+            response.put("Message", "No doctors found for this specialty.");
+            response.put("Doctors", doctors);
+            return response;
+        }
+    
+        response.put("Doctors", doctors);
+    
+        return response;
+    }
 
     // 17. **filterDoctorsByTime Method**:
     // - Filters all doctors based on their availability during a specific time
@@ -245,5 +361,50 @@ public class DoctorService {
     // - The method checks all doctors' available times and returns those available
     // during the specified time period.
     // - Instruction: Ensure proper filtering logic to handle AM/PM time periods.
+    public Map<String, Object> filterDoctorsByTime(String amOrPm) {
+        // 1. Obtener todos los doctores de la Base de Datos
+        List<Doctor> doctors = doctorRepository.findAll();
+    
+        // 2. Filtrar en memoria según el bloque horario (AM o PM)
+        List<Doctor> filteredDoctors = doctors.stream()
+                .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
+                .toList();
+    
+        // 3. Construir el mapa de retorno con los resultados
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctors", filteredDoctors);
+    
+        return response;
+    }
+
+    /**
+     * Método auxiliar para verificar si el doctor tiene al menos una hora
+     * disponible
+     * en el bloque horario solicitado (AM o PM).
+     */
+    private boolean matchesTimeSlot(Doctor doctor, String amOrPm) {
+        // Si el parámetro viene vacío o nulo, no filtramos por hora (pasan todos)
+        if (amOrPm == null || amOrPm.isBlank()) {
+            return true;
+        }
+
+        List<String> availableTimes = doctor.getAllAvailableTimes();
+        if (availableTimes == null || availableTimes.isEmpty()) {
+            return false;
+        }
+
+        return availableTimes.stream().anyMatch(time -> {
+            // Comparamos el formato "HH:mm" contra las 12:00 para determinar AM/PM
+            boolean isAmTime = time.compareTo("12:00") < 0;
+
+            if ("AM".equalsIgnoreCase(amOrPm)) {
+                return isAmTime;
+            } else if ("PM".equalsIgnoreCase(amOrPm)) {
+                return !isAmTime;
+            }
+
+            return false;
+        });
+    }
 
 }
