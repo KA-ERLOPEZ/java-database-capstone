@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.ResponseEntity;
 
 import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.models.Appointment;
@@ -30,6 +32,9 @@ public class PatientService {
     // practices of dependency injection and testing.
     // - Instruction: Ensure constructor injection is used for all the required
     // dependencies.
+    private static final String FUTURE = "FUTURE";
+    private static final String PAST = "PAST";
+
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
@@ -68,6 +73,7 @@ public class PatientService {
     // during the transaction.
     // - Instruction: Ensure that appointment data is properly converted into DTOs
     // and the method handles errors gracefully.
+    @Transactional
     public Map<String, Object> getPatientAppointment(Long id, String token){
 
         String tokenEmail = tokenService.extractEmail(token);
@@ -93,6 +99,24 @@ public class PatientService {
     // response.
     // - Instruction: Ensure the method correctly handles "past" and "future"
     // conditions, and that invalid conditions are caught and returned as errors.
+    public ResponseEntity<Map<String, Object> filterByCondition(String condition, Long id){
+        Optional<Patient> patientOptional = patientRepository.findById(id);
+        if (patientOptional.isEmpty()) {
+            return Map.of("Error", "Patient not found");
+        }
+
+        if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUCTURE)) {
+            return Map.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
+        }
+
+        int statusTarget = (condition == FUTURE) ? 1 : 0;
+
+        List<AppointmentDTO> appointments = appointmentRepository.findByPatientId(id).stream()
+        .filter(appointment -> appointment.getStatus() == statusTarget)
+        .map(this::toAppointmentDTO).toList();
+        
+        return Map.of("Appointments", appointments);
+    }
 
     // 6. **filterByDoctor Method**:
     // - Filters appointments for a patient based on the doctor's name.
