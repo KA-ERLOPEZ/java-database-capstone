@@ -62,6 +62,14 @@ public class Appointment{
         this.appointmentTime = appointmenTime;
     }
 
+    public int getStatus(){
+        return status;
+    }
+
+    public void setStatus(int status){
+        this.status = status;
+    }
+
     @Transient 
     public LocalTime getEndTime(){
         return appointmentTime.toLocalTime().plusHours(1);
