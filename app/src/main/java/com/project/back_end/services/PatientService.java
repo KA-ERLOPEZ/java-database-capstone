@@ -126,7 +126,7 @@ public class PatientService {
     // and the patient ID matches the provided ID.
     // - Instruction: Ensure that the method correctly filters by doctor's name and
     // patient ID and handles any errors or invalid cases.
-    public ResponseEntity<Map<String, Object>> filterByDoctor(String name, Long patientId) {
+    public ResponseEntity<Map<String, Object>> filterByDoctor (String name, Long patientId) {
         try {
             if (name == null || name.isEmpty()) {
                 return new ResponseEntity<>(Map.of("Error", "Invalid name"));
@@ -205,7 +205,7 @@ public class PatientService {
         } catch (Exception e) {
             // TODO: handle exception
             return new ResponseEntity<>(Map.of("Error", e.getMessage()));
-            
+
         }
     }
 
