@@ -39,14 +39,15 @@ public class PatientService {
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
 
-    public PatientService (PatientRepository patientRepository, 
-    AppointmentRepository appointmentRepository,
-    TokenService tokenService){
+    public PatientService(PatientRepository patientRepository,
+            AppointmentRepository appointmentRepository,
+            TokenService tokenService) {
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.tokenService = tokenService;
 
     }
+
     // 3. **createPatient Method**:
     // - Creates a new patient in the database. It saves the patient object using
     // the `PatientRepository`.
@@ -54,7 +55,7 @@ public class PatientService {
     // logs the error and returns `0`.
     // - Instruction: Ensure that error handling is done properly and exceptions are
     // caught and logged appropriately.
-    public int createPatient (Patient patient){
+    public int createPatient(Patient patient) {
         try {
             patientRepository.save(patient);
             return 1;
@@ -74,7 +75,7 @@ public class PatientService {
     // - Instruction: Ensure that appointment data is properly converted into DTOs
     // and the method handles errors gracefully.
     @Transactional
-    public Map<String, Object> getPatientAppointment(Long id, String token){
+    public Map<String, Object> getPatientAppointment(Long id, String token) {
 
         String tokenEmail = tokenService.extractEmail(token);
 
@@ -85,11 +86,12 @@ public class PatientService {
             return Map.of("Message", "404 Unauthorized");
         }
         List<AppointmentDTO> appointments = appointmentRepository.findByPatientId(id)
-        .stream().map(appointment -> toAppointmentDto(appointment))
-        .collect(Collectors.toList());
+                .stream().map(appointment -> toAppointmentDto(appointment))
+                .collect(Collectors.toList());
 
         return Map.of("Appointments", appointments);
     }
+
     // 5. **filterByCondition Method**:
     // - Filters appointments for a patient based on the condition (e.g., "past" or
     // "future").
@@ -99,7 +101,7 @@ public class PatientService {
     // response.
     // - Instruction: Ensure the method correctly handles "past" and "future"
     // conditions, and that invalid conditions are caught and returned as errors.
-    public ResponseEntity<Map<String, Object> filterByCondition(String condition, Long id){
+    public ResponseEntity<Map<String, Object>> filterByCondition(String condition, Long id) {
         Optional<Patient> patientOptional = patientRepository.findById(id);
         if (patientOptional.isEmpty()) {
             return Map.of("Error", "Patient not found");
@@ -112,9 +114,9 @@ public class PatientService {
         int statusTarget = (condition == FUTURE) ? 1 : 0;
 
         List<AppointmentDTO> appointments = appointmentRepository.findByPatientId(id).stream()
-        .filter(appointment -> appointment.getStatus() == statusTarget)
-        .map(this::toAppointmentDTO).toList();
-        
+                .filter(appointment -> appointment.getStatus() == statusTarget)
+                .map(this::toAppointmentDTO).toList();
+
         return Map.of("Appointments", appointments);
     }
 
@@ -124,6 +126,27 @@ public class PatientService {
     // and the patient ID matches the provided ID.
     // - Instruction: Ensure that the method correctly filters by doctor's name and
     // patient ID and handles any errors or invalid cases.
+    public ResponseEntity<Map<String, Object>> filterByDoctor(String name, Long patientId) {
+        try {
+            if (name == null || name.isEmpty()) {
+                return new ResponseEntity<>(Map.of("Error", "Invalid name"));
+            }
+            Optional<Patient> existsPatient = patientRepository.findById(id);
+            if (existsPatient.isEmpty()) {
+
+                return new ResponseEntity<>(Map.of("Error", "Patitent not found"));
+            }
+
+            List<AppointmentDTO> appointments = appointmentRepository.filterByDoctorNameAndPatientId(name, patientId)
+                    .stream().map(this::toAppointmentDTO).toList();
+
+            return new ResponseEntity<>(Map.of("Appointments", appointments));
+        } catch (Exception e) {
+            // TODO: handle exception
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+        }
+
+    }
 
     // 7. **filterByDoctorAndCondition Method**:
     // - Filters appointments based on both the doctor's name and the condition
@@ -134,6 +157,35 @@ public class PatientService {
     // the response.
     // - Instruction: Ensure that the filter handles both doctor name and condition
     // properly, and catches errors for invalid input.
+    public ResponseEntity<Map<String, Object>> filterByDoctorAndCondition(String condition, String name,
+            Long patientId) {
+        try {
+            if (name == null || name.isEmpty()) {
+                return new ResponseEntity<>(Map.of("Error", "Invalid name"));
+            }
+            Optional<Patient> existsPatient = patientRepository.findById(id);
+            if (existsPatient.isEmpty()) {
+
+                return new ResponseEntity<>(Map.of("Error", "Patitent not found"));
+            }
+
+            if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUCTURE)) {
+                return Map.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
+            }
+
+            int statusTarget = (condition == FUTURE) ? 1 : 0;
+
+            List<AppointmentDTO> appointments = appointmentRepository.filterByDoctorNameAndPatientId(name, patientId)
+                    .stream().filter(appointment -> appointment.getStatus() == statusTarget).map(this::toAppointmentDTO)
+                    .toList();
+
+            return new ResponseEntity<>(Map.of("Appointments", appointments));
+        } catch (Exception e) {
+            // TODO: handle exception
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+        }
+
+    }
 
     // 8. **getPatientDetails Method**:
     // - Retrieves patient details using the `tokenService` to extract the patient's
@@ -143,6 +195,19 @@ public class PatientService {
     // - It returns the patient's information in the response body.
     // - Instruction: Make sure that the token extraction process works correctly
     // and patient details are fetched properly based on the extracted email.
+    public ResponseEntity<Map<String, Object>> getPatientDetails(String token){
+
+        try {
+        String email = tokenService.extractEmail(token);
+
+        Patient patient = patientRepository.findByEmail(email);
+        return new ResponseEntity<>(Map.of("Details", patient));
+        } catch (Exception e) {
+            // TODO: handle exception
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+            
+        }
+    }
 
     // 9. **Handling Exceptions and Errors**:
     // - The service methods handle exceptions using try-catch blocks and log any
@@ -159,20 +224,19 @@ public class PatientService {
     // - Instruction: Ensure that DTOs are used appropriately to limit the exposure
     // of internal data and only send the relevant fields to the client.
 
-    private AppointmentDTO toAppointmentDTO(Appointment appointment){
+    private AppointmentDTO toAppointmentDTO(Appointment appointment) {
         AppointmentDTO appointmentDTO = new AppointmentDTO(
-            appointment.getId(),
-            appointment.getDoctor().getId(),
-            appointment.getPatient().getId(),
-            appointment.getPatient().getName(),
-            appointment.getPatient().getPhone(),
-            appointment.getPatient().getEmail(),
-            appointment.getPatient().getAddress(),
-            appointment.getAppointmentTime(),
-            appointment.getStatus()
-            );
+                appointment.getId(),
+                appointment.getDoctor().getId(),
+                appointment.getPatient().getId(),
+                appointment.getPatient().getName(),
+                appointment.getPatient().getPhone(),
+                appointment.getPatient().getEmail(),
+                appointment.getPatient().getAddress(),
+                appointment.getAppointmentTime(),
+                appointment.getStatus());
 
-            return appointmentDTO;
+        return appointmentDTO;
     }
 
 }
