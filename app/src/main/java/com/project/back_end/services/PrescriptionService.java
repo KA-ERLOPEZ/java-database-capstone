@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import com.project.back_end.models.Prescription;
 import com.project.back_end.repo.PrescriptionRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class PrescriptionService {
 
@@ -21,6 +24,8 @@ public class PrescriptionService {
     // - Instruction: Ensure the `@Service` annotation is applied to mark this class
     // as a Spring-managed service.
 
+    private static final Logger logger = LoggerFactory.getLogger(PrescriptionService.class);
+
     // 2. **Constructor Injection for Dependencies**:
     // - The `PrescriptionService` class depends on the `PrescriptionRepository` to
     // interact with the database.
@@ -29,8 +34,8 @@ public class PrescriptionService {
     // - Instruction: Constructor injection is a good practice, ensuring that all
     // necessary dependencies are available at the time of service initialization.
     private final PrescriptionRepository prescriptionRepository;
-    
-    public PrescriptionService(PrescriptionRepository prescriptionRepository){
+
+    public PrescriptionService(PrescriptionRepository prescriptionRepository) {
         this.prescriptionRepository = prescriptionRepository;
     }
     // 3. **savePrescription Method**:
@@ -45,8 +50,8 @@ public class PrescriptionService {
     // messages, ensuring that multiple prescriptions for the same appointment are
     // not saved.
 
-    public ResponseEntity<Map<String, String>> savePrescription(Prescription prescription){
-        
+    public ResponseEntity<Map<String, String>> savePrescription(Prescription prescription) {
+
         try {
             Optional<Prescription> existsPrescrition = prescriptionRepository.findById(prescription.getId());
             if (existsPrescrition.isEmpty()) {
@@ -56,10 +61,11 @@ public class PrescriptionService {
             prescriptionRepository.save(prescription);
             return new ResponseEntity<>(Map.of("Success", "Prescription saved"), HttpStatus.CREATED);
         } catch (Exception e) {
-            // TODO: handle exception
+            logger.error("Error saving prescription.", e);
             return new ResponseEntity<>(Map.of("Error", "Internal server error"), HttpStatus.SERVER_INTERNAL_ERROR);
         }
     }
+
     // 4. **getPrescription Method**:
     // - Retrieves a prescription associated with a specific appointment based on
     // the `appointmentId`.
@@ -70,6 +76,23 @@ public class PrescriptionService {
     // - Instruction: Ensure that this method handles edge cases, such as no
     // prescriptions found for the given appointment, by returning meaningful
     // responses.
+    public ResponseEntity<Map<String, Object>> getPrescription(Long appointmentId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Prescription> prescriptions = prescriptionRepository.findByAppointmentId(appointmentId);
+            response.put("status", HttpStatus.OK.value());
+            response.put("message", "Prescription retrieved successfully.");
+            response.put("prescription", prescriptions);
+            return new ResponseEntity<>(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving prescription.", e);
+
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("message", "Unable to retrieve prescription.");
+            return new ResponseEntity<>(response);
+
+        }
+    }
 
     // 5. **Exception Handling and Error Responses**:
     // - Both methods (`savePrescription` and `getPrescription`) contain try-catch
