@@ -63,6 +63,15 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findBySpecialtyIgnoreCase(String specialty);
 
 
+     @Query("SELECT d FROM Doctor d WHERE " +
+           "(:name IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+           "(:specialty IS NULL OR UPPER(d.specialty) = UPPER(:specialty)) AND " +
+           "(:timeSlot IS NULL OR :timeSlot MEMBER OF d.availableTimes)")
+    List<Doctor> findByDynamicFilters(
+        @Param("name") String name, 
+        @Param("specialty") String specialty, 
+        @Param("timeSlot") String timeSlot
+    );
 
     // 3. @Repository annotation:
     // - The @Repository annotation marks this interface as a Spring Data JPA repository.

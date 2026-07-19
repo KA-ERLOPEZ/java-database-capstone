@@ -2,12 +2,18 @@ package com.project.back_end.services;
 
 import com.project.back_end.models.Admin;
 import com.project.back_end.models.Appointment;
+import com.project.back_end.models.Doctor;
+import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
@@ -82,9 +88,9 @@ public class Service {
     // Error response is returned.
     // This method ensures that only valid admin users can access secured parts of
     // the system.
-    public ResponseEntity<Map<String, String>> validateAdmin(Admin admin){
+    public ResponseEntity<Map<String, String>> validateAdmin(Admin admin) {
         Map<String, String> response = new HashMap<>();
-        
+
         Admin existsAdmin = adminRepository.findByUsername(admin.getUsername());
 
         try {
@@ -101,9 +107,9 @@ public class Service {
             response.put("Success", "Successful login");
             response.put("token", token);
             return new ResponseEntity<>(response, HttpStatus.OK);
-            
+
         } catch (Exception e) {
-            response.put("Error", "An error has occurred. Please try again later.")
+            response.put("Error", "An error has occurred. Please try again later.");
             return new ResponseEntity<>(response, HttpStatus.SERVER_INTERNAL_ERROR);
         }
 
@@ -116,9 +122,21 @@ public class Service {
     // - If none of the filters are provided, it returns all available doctors.
     // This flexible filtering mechanism allows the frontend or consumers of the API
     // to search and narrow down doctors based on user criteria.
-    public Map<String,Object> filterDoctor(String name, String specialty, String time){
-        
+    public Map<String, Object> filterDoctor(String name, String specialty, String time) {
+
+        // Contar cuantos filtros son nulos o vacios
+        long activeFilterCount = Stream.of(name, specialty, time)
+                .filter(filter -> filter != null || !filter.isEmpty()).count();
+        Map<String, Object> response = new HashMap<>();
+        if (activeFilterCount == 0) {
+            response.put("Doctors", doctorRepository.findAll());
+            return response;
+        }
+        response.put("Doctors", doctorRepository.findByDynamicFilters(name, specialty, time));
+        return response;
+
     }
+
     // 6. **validateAppointment Method**
     // This method validates if the requested appointment time for a doctor is
     // available.
@@ -132,7 +150,22 @@ public class Service {
     // - If the doctor doesn’t exist, it returns -1.
     // This logic prevents overlapping or invalid appointment bookings.
     public int validateAppointment(Appointment appointment) {
-        return 1;
+
+        // 1. Verificar si el doctor existe en el repositorio
+        Optional<Doctor> doctorOpt = doctorRepository.findById(appointment.getDoctor().getId());
+
+        // - Si el doctor no existe, retorna -1
+        if (!doctorOpt.isPresent()) {
+            return -1;
+        }
+
+        String appointmentTime = appointment.getAppointmentTimeOnly().toString();
+
+        boolean isAvailableTime = doctorService.getDoctorAvailability(doctorOpt.get().getId(), appointment.getAppointmentDate())
+                                .stream().anyMatch(time -> time.equals(appointmentTime));
+
+
+        return isAvailableTime ? 1 : 0;
     }
     // 7. **validatePatient Method**
     // This method checks whether a patient with the same email or phone number
@@ -142,6 +175,14 @@ public class Service {
     // - If no match is found, it returns true.
     // This helps enforce uniqueness constraints on patient records and prevent
     // duplicate entries.
+    public boolean validatePatient (Patient patient){
+        Patient existPatient = patientRepository.findByEmail(patient.getEmail());
+        if (!Objects.isNull(existPatient)) {
+            return false;
+        }
+
+        return true;
+    }
 
     // 8. **validatePatientLogin Method**
     // This method handles login validation for patient users.
@@ -154,6 +195,34 @@ public class Service {
     // - If an exception occurs, it returns a 500 Internal Server Error.
     // This method ensures only legitimate patients can log in and access their data
     // securely.
+    public ResponseEntity<Map<String, String>> validatePatientLogin(Login login) {
+        Map<String, String> response = new HashMap<>();
+        String errorMessage = "Invalid email or password";
+    
+        // 1. Buscar al paciente por su correo electrónico
+        Patient patientOpt = patientRepository.findByEmail(login.getEmail());
+    
+        // 2. Error genérico si el correo no existe
+        if (Objects.isNull(patientOpt)){
+            response.put("error", errorMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    
+        Patient patient = patientOpt.get();
+    
+        // 3. Error genérico si la contraseña no coincide
+        if (!patient.getPassword().equals(login.getPassword())) {
+            response.put("error", errorMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    
+        // 4. Generar el token si las credenciales son válidas
+        String token = tokenService.generateToken(patient.getEmail());
+    
+        // 5. Retornar el token con estado 200 OK
+        response.put("token", token);
+        return ResponseEntity.ok(response);
+    }
 
     // 9. **filterPatient Method**
     // This method filters a patient's appointment history based on condition and
@@ -164,5 +233,43 @@ public class Service {
     // - If no filters are provided, it retrieves all appointments for the patient.
     // This flexible method supports patient-specific querying and enhances user
     // experience on the client side.
+    public ResponseEntity<Map<String, Object>> filterPatient(String condition, String name, String token) {
+        Map<String, Object> response = new HashMap<>();
+    
+        String patientEmail = tokenService.extractEmail(token);
+
+        Patient patient = patientRepository.findByEmail(patientEmail);
+
+        if (Objects.isNull(patient)) {
+            response.put("Error", "Patient not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    
+        // 2. Normalizar las entradas para controlar nulos y textos vacíos ("")
+        boolean hasCondition = condition != null && !condition.trim().isEmpty();
+        boolean hasDoctorName = name != null && !name.trim().isEmpty();
+    
+        List<Appointment> filteredAppointments;
+    
+        // 3. Evaluar las combinaciones de los filtros dinámicamente
+        if (hasCondition && hasDoctorName) {
+            // Combinación A: Ambos filtros activos
+            filteredAppointments = patientService.filterByDoctorAndCondition(condition, name.trim(), patient.getId());
+        } else if (hasCondition) {
+            // Combinación B: Solo filtro de condición médica
+            filteredAppointments = patientService.filterByCondition(condition.trim(), patient.getId());
+        } else if (hasDoctorName) {
+            // Combinación C: Solo filtro por nombre de doctor
+            filteredAppointments = patientService.filterByDoctor(name.trim(), patient.getId());
+        } else {
+            // Combinación D: Ningún filtro provisto (retorna el historial completo del paciente)
+            filteredAppointments = Collections.emptyList();
+        }
+    
+        // 4. Empaquetar el resultado en el mapa y responder con éxito 200 OK
+        response.put("appointments", filteredAppointments);
+        
+        return ResponseEntity.ok(response);
+    }
 
 }
