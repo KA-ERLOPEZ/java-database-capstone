@@ -245,14 +245,12 @@ public class Service {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     
-        // 2. Normalizar las entradas para controlar nulos y textos vacíos ("")
         boolean hasCondition = condition != null && !condition.trim().isEmpty();
         boolean hasDoctorName = name != null && !name.trim().isEmpty();
     
         List<Appointment> filteredAppointments;
     
-        // 3. Evaluar las combinaciones de los filtros dinámicamente
-        if (hasCondition && hasDoctorName) {
+         if (hasCondition && hasDoctorName) {
             // Combinación A: Ambos filtros activos
             filteredAppointments = patientService.filterByDoctorAndCondition(condition, name.trim(), patient.getId());
         } else if (hasCondition) {
