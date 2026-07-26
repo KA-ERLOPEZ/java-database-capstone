@@ -8,6 +8,17 @@ import com.project.back_end.models.Doctor;
 import com.project.back_end.services.DoctorService;
 import com.project.back_end.services.Service;
 
+import org.springframwork.web.bind.annotation.RestController;
+import org.springframwork.web.bind.annotation.RequestMapping;
+import org.springframwork.web.bind.annotation.GetMapping;
+import org.springframwork.web.bind.annotation.PostMapping;
+import org.springframwork.web.bind.annotation.PutMapping;
+import org.springframwork.web.bind.annotation.DeleteMapping;
+import org.springframwork.web.bind.annotation.RequestBody;
+import org.springframwork.web.bind.annotation.PathVariable;
+import org.springframwork.http.ResponseEntity;
+import org.springframwork.http.HttpStatus;
+
 @RestController
 @RequestMapping("${api.path}doctor")
 public class DoctorController {
