@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 
 @RestController
@@ -35,7 +38,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final Service service;
 
-    public AppointmentController (AppoinmentService appointmentService, Service service){
+    public AppointmentController(AppoinmentService appointmentService, Service service) {
         this.appointmentService = appointmentService;
         this.service = service;
     }
@@ -50,7 +53,8 @@ public class AppointmentController {
     // - If the token is invalid or expired, responds with the appropriate message
     // and status code.
     @GetMapping("/{date}/{patientName}/{token}")
-    public ResponseEntity<?> getAppointments(@PathVariable LocalDate date, @PathVariable String patientName, @PathVariable String token ){
+    public ResponseEntity<?> getAppointments(@PathVariable LocalDate date, @PathVariable String patientName,
+            @PathVariable String token) {
 
         ResponseEntity<?> responseValidateToken = this.service.validateToken(token, "doctor");
         boolean isValidToken = responseValidateToken.getStatusCode().value() == 200 ? true : false;
@@ -73,24 +77,30 @@ public class AppointmentController {
     // is invalid or the slot is already taken.
 
     @PostMapping("/{token}")
-    public ResponseEntity<?> bookAppointment(@RequestBody Appointment appointment, @PathVariable String token){
+    public ResponseEntity<?> bookAppointment(@RequestBody Appointment appointment, @PathVariable String token) {
 
-       int validateAppointment= service.validateAppointment(appointment);
-       boolean isValidToken = service.validateToken(token, "patient").getStatusCode().value() == 200 ? true : false;
+        int validateAppointment = service.validateAppointment(appointment);
+        boolean isValidToken = service.validateToken(token, "patient").getStatusCode().value() == 200 ? true : false;
 
-       if (validateAppointment == -1) {
-        return new ResponseEntity<>(Map.of("Error", "Doctor not found") HttpStatus.);
-       }
+        if (validateAppointment == -1) {
+            return new ResponseEntity<>(Map.of("Error", "Doctor not found"), HttpStatus.BAD_REQUEST);
+        }
 
-       if (validateAppointment == 0) {
-        return new ResponseEntity<>(Map.of("Error", "Invalid time") HttpStatus.BAD_REQUEST);
-       }
+        if (validateAppointment == 0) {
+            return new ResponseEntity<>(Map.of("Error", "Invalid time"), HttpStatus.BAD_REQUEST);
+        }
 
-       if (isValidToken) {
-        return new ResponseEntity<>(Map.of("Error", "You do not have permission") HttpStatus.UNAUTHORIZED);
-       }
+        if (isValidToken) {
+            return new ResponseEntity<>(Map.of("Error", "You do not have permission"), HttpStatus.UNAUTHORIZED);
+        }
 
-       return ResponseEntity.status(HttpStatus.CREATED).body(appointmentService.bookAppointment(appointment));
+        int saveStatus = appointmentService.bookAppointment(appointment);
+
+        if (saveStatus == 0) {
+            return new ResponseEntity<>(Map.of("Error", "The appointment could not be saved"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("Succes", "Appointment saved"));
     }
 
     // 5. Define the `updateAppointment` Method:
@@ -101,6 +111,19 @@ public class AppointmentController {
     // - Returns an appropriate success or failure response based on the update
     // result.
 
+    @PutMapping("/{token}")
+    public ResponseEntity<?> updateAppointment(@PathVariable String token, @RequestBody Appointment appointment) {
+
+        ResponseEntity<?> responseToken = service.validateToken(token, "patient");
+        boolean isValidToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+
+        if (!isValidToken) {
+            return responseToken;
+        }
+
+        return new ResponseEntity<>(appointmentService.updateAppointment(appointment));
+    }
+
     // 6. Define the `cancelAppointment` Method:
     // - Handles HTTP DELETE requests to cancel a specific appointment.
     // - Accepts the appointment ID and a token as path variables.
@@ -108,5 +131,20 @@ public class AppointmentController {
     // to cancel the appointment.
     // - Calls `AppointmentService` to handle the cancellation process and returns
     // the result.
+    @DeleteMapping("/{id}/{token}")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long appointmentId,
+            @PathVariable String token) {
+       
+        boolean isValid = service.validateToken(token, "patient")
+                .getHttpStatusCode().value() == 200 ? true : false;
+
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid token or unauthorized access to cancel this appointment.");
+        }
+
+        return new ResponseEntity<>(appointmentService.cancelAppointment(appointmentId));
+    }
 
 }
