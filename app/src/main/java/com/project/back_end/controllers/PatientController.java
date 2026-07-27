@@ -7,14 +7,14 @@ import com.project.back_end.models.Patient;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
 
-import org.springframwork.web.bind.annotation.RestController;
-import org.springframwork.web.bind.annotation.RequestMapping;
-import org.springframwork.web.bind.annotation.GetMapping;
-import org.springframwork.web.bind.annotation.PostMapping;
-import org.springframwork.web.bind.annotation.RequestBody;
-import org.springframwork.web.bind.annotation.PathVariable;
-import org.springframwork.http.ResponseEntity;
-import org.springframwork.http.HttpStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/patient")
