@@ -137,7 +137,7 @@ public class AppointmentDTO {
     // appointmentTimeOnly, and endTime.
     // - These methods allow access to the values of the fields in the
     // AppointmentDTO object.
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -178,7 +178,7 @@ public class AppointmentDTO {
     }
 
     public LocalDate getAppointmentDate() {
-        return this.appointmentDate;
+        return appointmentDate;
     }
     
     public LocalTime getAppointmentTimeOnly() {

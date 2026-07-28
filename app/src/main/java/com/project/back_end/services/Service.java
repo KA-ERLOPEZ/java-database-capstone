@@ -16,13 +16,12 @@ import java.util.stream.Stream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-
-import org.springframework.stereotype.Service;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
-@Service
+@org.springframework.stereotype.Service
 public class Service {
     // 1. **@Service Annotation**
     // The @Service annotation marks this class as a service component in Spring.
@@ -72,7 +71,7 @@ public class Service {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
-        esponse.put("Success", "Valid token");
+        response.put("Success", "Valid token");
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
@@ -112,7 +111,7 @@ public class Service {
 
         } catch (Exception e) {
             response.put("Error", "An error has occurred. Please try again later.");
-            return new ResponseEntity<>(response, HttpStatus.SERVER_INTERNAL_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -202,15 +201,14 @@ public class Service {
         String errorMessage = "Invalid email or password";
     
         // 1. Buscar al paciente por su correo electrónico
-        Patient patientOpt = patientRepository.findByEmail(login.getEmail());
+        Patient patient = patientRepository.findByEmail(login.getEmail());
     
         // 2. Error genérico si el correo no existe
-        if (Objects.isNull(patientOpt)){
+        if (Objects.isNull(patient)){
             response.put("error", errorMessage);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     
-        Patient patient = patientOpt.get();
     
         // 3. Error genérico si la contraseña no coincide
         if (!patient.getPassword().equals(login.getPassword())) {

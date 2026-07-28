@@ -86,8 +86,8 @@ public class PatientService {
             return Map.of("Message", "404 Unauthorized");
         }
         List<AppointmentDTO> appointments = appointmentRepository.findByPatientId(id)
-                .stream().map(appointment -> toAppointmentDto(appointment))
-                .collect(Collectors.toList());
+                .stream().map(appointment -> toAppointmentDTO(appointment))
+                .toList();
 
         return Map.of("Appointments", appointments);
     }
@@ -104,11 +104,11 @@ public class PatientService {
     public ResponseEntity<Map<String, Object>> filterByCondition(String condition, Long id) {
         Optional<Patient> patientOptional = patientRepository.findById(id);
         if (patientOptional.isEmpty()) {
-            return Map.of("Error", "Patient not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body( Map.of("Error", "Patient not found"));
         }
 
-        if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUCTURE)) {
-            return Map.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
+        if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUTURE)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Error", "Invalid condition: enter 'FUTURE' or 'PAST'"));
         }
 
         int statusTarget = (condition == FUTURE) ? 1 : 0;
@@ -117,7 +117,7 @@ public class PatientService {
                 .filter(appointment -> appointment.getStatus() == statusTarget)
                 .map(this::toAppointmentDTO).toList();
 
-        return Map.of("Appointments", appointments);
+        return ResponseEntity.ok(Map.of("Appointments", appointments));
     }
 
     // 6. **filterByDoctor Method**:
@@ -129,18 +129,18 @@ public class PatientService {
     public ResponseEntity<Map<String, Object>> filterByDoctor (String name, Long patientId) {
         try {
             if (name == null || name.isEmpty()) {
-                return new ResponseEntity<>(Map.of("Error", "Invalid name"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Error", "Invalid name"));
             }
-            Optional<Patient> existsPatient = patientRepository.findById(id);
+            Optional<Patient> existsPatient = patientRepository.findById(patientid);
             if (existsPatient.isEmpty()) {
 
-                return new ResponseEntity<>(Map.of("Error", "Patitent not found"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Error", "Patitent not found"));
             }
 
             List<AppointmentDTO> appointments = appointmentRepository.filterByDoctorNameAndPatientId(name, patientId)
                     .stream().map(this::toAppointmentDTO).toList();
 
-            return new ResponseEntity<>(Map.of("Appointments", appointments));
+            return ResponseEntity.ok(Map.of("Appointments", appointments));
         } catch (Exception e) {
             // TODO: handle exception
             return new ResponseEntity<>(Map.of("Error", e.getMessage()));
@@ -166,12 +166,12 @@ public class PatientService {
             Optional<Patient> existsPatient = patientRepository.findById(id);
             if (existsPatient.isEmpty()) {
 
-                return new ResponseEntity<>(Map.of("Error", "Patitent not found"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Error", "Patitent not found"));
             }
 
-            if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUCTURE)) {
-                return Map.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
-            }
+            if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUTURE)) {
+                return ResponseEtity.status(HttpStatus.BAD_REQUEST).bMap(.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
+)            }
 
             int statusTarget = (condition == FUTURE) ? 1 : 0;
 
@@ -228,6 +228,7 @@ public class PatientService {
         AppointmentDTO appointmentDTO = new AppointmentDTO(
                 appointment.getId(),
                 appointment.getDoctor().getId(),
+                appointment.getDoctor().getName(),
                 appointment.getPatient().getId(),
                 appointment.getPatient().getName(),
                 appointment.getPatient().getPhone(),

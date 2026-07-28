@@ -46,7 +46,7 @@ public class Doctor {
         return failedAttempts;
     }
 
-    public void setFailedAttemps(int failedAttempts){
+    public void setFailedAttempts(int failedAttempts){
         this.failedAttempts = failedAttempts;
     }
 

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.http.HttpStatus;
 @RestController
 @RequestMapping("/appointments")
 public class AppointmentController {
@@ -115,7 +115,7 @@ public class AppointmentController {
     public ResponseEntity<?> updateAppointment(@PathVariable String token, @RequestBody Appointment appointment) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, "patient");
-        boolean isValidToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidToken) {
             return responseToken;
@@ -137,14 +137,14 @@ public class AppointmentController {
             @PathVariable String token) {
        
         boolean isValid = service.validateToken(token, "patient")
-                .getHttpStatusCode().value() == 200 ? true : false;
+                .getStatusCode().value() == 200 ? true : false;
 
         if (!isValid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid token or unauthorized access to cancel this appointment.");
         }
 
-        return new ResponseEntity<>(appointmentService.cancelAppointment(appointmentId));
+        return appointmentService.cancelAppointment(appointmentId);
     }
 
 }

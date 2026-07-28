@@ -120,9 +120,9 @@ public class DoctorService {
     // updated record and handle any errors properly.
     public int updateDoctor(Doctor doctor) {
         try {
-            Optional<Doctor> existDoctor = doctorRepository.findById(doctor.getId());
+            Optional<Doctor> existsDoctor = doctorRepository.findById(doctor.getId());
 
-            if (existsDoexistDoctor.isEmpty()) {
+            if (existsDoctor.isEmpty()) {
                 return -1;
             }
 
