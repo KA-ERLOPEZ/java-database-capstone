@@ -118,15 +118,15 @@ public class AppointmentDTO {
             int status) {
         this.id = id;
         this.doctorId = doctorId;
-        this.doctorName = doctorId;
+        this.doctorName = doctorName;
         this.patientId = patientId;
         this.patientPhone = patientPhone;
         this.patientEmail = patientEmail;
         this.patientAddress = patientAddress;
         this.appointmentTime = appointmenTime;
         this.status = status;
-        this.appointmentDate = this.appointmenTime.toLocalDate();
-        this.appointmentTimeOnly = this.appointmenTime.toLocalTime();
+        this.appointmentDate = this.appointmentTime.toLocalDate();
+        this.appointmentTimeOnly = this.appointmentTime.toLocalTime();
         this.endTime = appointmenTime.plusHours(1);
     }
 
@@ -141,7 +141,7 @@ public class AppointmentDTO {
         return id;
     }
 
-    public String getDoctorId() {
+    public Long getDoctorId() {
         return doctorId;
     }
 
@@ -149,7 +149,7 @@ public class AppointmentDTO {
         return doctorName;
     }
 
-    public String getPatientId() {
+    public Long getPatientId() {
         return patientId;
     }
 
@@ -173,20 +173,20 @@ public class AppointmentDTO {
         return appointmentTime;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
     public LocalDate getAppointmentDate() {
-        return this.appointmentTime.toLocalDate();
+        return this.appointmentDate;
     }
     
     public LocalTime getAppointmentTimeOnly() {
-        return appointmentTime.toLocalTime();
+        return appointmentTimeOnly;
     }
     
     public LocalDateTime getEndTime() {
-        return appointmentTime.plusHours();
+        return endTime;
     }
 
 }

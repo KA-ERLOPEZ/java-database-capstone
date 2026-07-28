@@ -23,7 +23,7 @@ public class DashboardController {
     // 2. Autowire the Shared Service:
     // - Inject the common `Service` class, which provides the token validation
     // logic used to authorize access to dashboards.
-    @Autowire
+    @Autowired
     private Service service;
 
     // 3. Define the `adminDashboard` Method:

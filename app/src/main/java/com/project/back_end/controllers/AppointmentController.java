@@ -38,7 +38,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final Service service;
 
-    public AppointmentController(AppoinmentService appointmentService, Service service) {
+    public AppointmentController(AppointmentService appointmentService, Service service) {
         this.appointmentService = appointmentService;
         this.service = service;
     }

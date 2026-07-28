@@ -54,7 +54,7 @@ public class DoctorController {
     @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
     public ResponseEntity<?> getDoctorAvailability(@PathVariable String user,
             @PathVariable LocalDate date,
-            @PathVariable Long id, @PathVariable Stirng token) {
+            @PathVariable Long id, @PathVariable String token) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, user);
 
@@ -86,7 +86,7 @@ public class DoctorController {
     // - If the doctor already exists, returns a conflict response; otherwise, adds
     // the doctor and returns a success message.
     @PostMapping("/{token}")
-    public ResponseEntity<?> saveDoctor(@PathVariable Stirng token, @RequestBody Doctor doctor) {
+    public ResponseEntity<?> saveDoctor(@PathVariable String token, @RequestBody Doctor doctor) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, "admin");
         boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;

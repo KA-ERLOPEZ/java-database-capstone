@@ -1,18 +1,19 @@
 package com.project.back_end.controllers;
 
-import org.springframwork.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.project.back_end.models.Prescription;
 import com.project.back_end.services.PrescriptionService;
 import com.project.back_end.services.Service;
 
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
-import org.springframwork.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("${api.path}prescription")
