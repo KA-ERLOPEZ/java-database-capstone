@@ -248,7 +248,7 @@ public class Service {
         boolean hasCondition = condition != null && !condition.trim().isEmpty();
         boolean hasDoctorName = name != null && !name.trim().isEmpty();
     
-       // List<Appointment> filteredAppointments;
+        List<Appointment> filteredAppointments;
     
          if (hasCondition && hasDoctorName) {
             // Combinación A: Ambos filtros activos
@@ -258,7 +258,7 @@ public class Service {
             /*filteredAppointments = */return patientService.filterByCondition(condition.trim(), patient.getId());
         } else if (hasDoctorName) {
             // Combinación C: Solo filtro por nombre de doctor
-            filteredAppointments = patientService.filterByDoctor(name.trim(), patient.getId());
+            /*filteredAppointments = */return patientService.filterByDoctor(name.trim(), patient.getId());
         } else {
             // Combinación D: Ningún filtro provisto (retorna el historial completo del paciente)
             filteredAppointments = Collections.emptyList();

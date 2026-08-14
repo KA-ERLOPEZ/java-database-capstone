@@ -132,7 +132,7 @@ public class PatientService {
             if (name == null || name.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Error", "Invalid name"));
             }
-            Optional<Patient> existsPatient = patientRepository.findById(patientid);
+            Optional<Patient> existsPatient = patientRepository.findById(patientId);
             if (existsPatient.isEmpty()) {
 
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Error", "Patitent not found"));
@@ -141,10 +141,10 @@ public class PatientService {
             List<AppointmentDTO> appointments = appointmentRepository.filterByDoctorNameAndPatientId(name, patientId)
                     .stream().map(this::toAppointmentDTO).toList();
 
-            return ResponseEntity.ok(Map.of("Appointments", appointments));
+            return ResponseEntity.ok(Map.of("Appointments", appointments), HttpStatus.OK);
         } catch (Exception e) {
             // TODO: handle exception
-            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -202,7 +202,7 @@ public class PatientService {
         String email = tokenService.extractEmail(token);
 
         Patient patient = patientRepository.findByEmail(email);
-        return new ResponseEntity<>(Map.of("Details", patient));
+        return new ResponseEntity<>(Map.of("Details", patient), HttpStatus.OK);
         } catch (Exception e) {
             // TODO: handle exception
             return new ResponseEntity<>(Map.of("Error", e.getMessage()));

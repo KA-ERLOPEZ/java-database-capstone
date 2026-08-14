@@ -3,6 +3,7 @@ package com.project.back_end.services;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -90,81 +91,13 @@ public class AppointmentService {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointment.getId());
 
         if(optionalAppointment.isEmpty()){
-            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment not found"));
         }
 
         int validateAppointment= service.validateAppointment(appointment);
 
         if(validateAppointment == 0){
 
-            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of( "Message", "Appointment not available"));
-            
-        }
-
-        if(validateAppointment == -1){
-
-            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Doctor does not exist"));
-
-        }
-
-        appointmentRepository.save(appointment);
-
-        return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment successfully registered"));
-
-
-    }
-
-    // 6. **Cancel Appointment Method**:
-    // - This method cancels an appointment by deleting it from the database.
-    // - It ensures the patient who owns the appointment is trying to cancel it and
-    // handles possible errors.
-    // - Instruction: Make sure that the method checks for the patient ID match
-    // before deleting the appointment.
-    // 6. **Método para cancelar una cita**:
-    // - Este método cancela una cita eliminándola de la base de datos.
-    // - Verifica que quien intenta cancelar la cita sea el paciente titular de la misma y
-    // gestiona los posibles errores.
-    // - Instrucción: Asegúrate de que el método valide la coincidencia del ID del paciente
-    // antes de eliminar la cita.
-    @Transactional
-    public ResponseEntity<Map<String, String>> cancelAppointment(Long id, String token){
-        String emailToken = tokenService.extractEmail(token);
-        Patient patient = patientRepository.findByEmail(emailToken);
-        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
-
-        if (optionalAppointment.isEmpty()) {
-            return new ResponseEntity<>(Map.of("Message", "Appointment not found"), HttpStatus.NOT_FOUND);
-        }
-
-        if (optionalAppointment.get().getPatient().getId() !=  patient.getId()) {
-
-            return new ResponseEntity<>(Map.of("Message", "User unauthorized"), HttpStatus.ANAUTHORIZED);
-        }
-
-        appointmentRepository.delete(optionalAppointment);
-
-        return new ResponseEntity<>(Map.of("Message", "Appointment deleted succesfully"), HttpStatus.OK);
-    }
-
-    // 7. **Get Appointments Method**:
-    // - This method retrieves a list of appointments for a specific doctor on a
-    // particular day, optionally filtered by the patient's name.
-    // - It uses `@Transactional` to ensure that database operations are consistent
-    // and handled in a single transaction.
-    // - Instruction: Ensure the correct use of transaction boundaries, especially
-    // when querying the database for appointments.
-    @Transactional
-    public Map<String, Object> getAppointments (String pname, LocalDate date, String token){
-        String tokenEmail = tokenService.extractEmail(token);
-        Doctor doctor = doctorRepository.findByEmail(tokenEmail);
-
-        List<Appointment> appointments = new Appointment<>();
-        if (Objects.isNull(pname)) {
-
-            appointments.addAll(appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctor.getId(), date.atStartOfDay(), date.atStartOfDay));
-
-        }else{
-            appointments.addAll(appointmentRepository.findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(doctor.getId(), pname, date.atStartOfDay(), date.atStartOfDay()));
         }
 
         return Map.of("appointments", appointments);
