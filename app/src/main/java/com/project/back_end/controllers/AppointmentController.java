@@ -63,7 +63,7 @@ public class AppointmentController {
             return responseValidateToken;
         }
 
-        return ResponseEntity.ok(appointmentService.getAppointments(patientName, date, token));
+        return ResponseEntity.ok(appointmentService.getAppointment(patientName, date, token));
     }
 
     // 4. Define the `bookAppointment` Method:

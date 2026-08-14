@@ -141,7 +141,7 @@ public class PatientService {
             List<AppointmentDTO> appointments = appointmentRepository.filterByDoctorNameAndPatientId(name, patientId)
                     .stream().map(this::toAppointmentDTO).toList();
 
-            return ResponseEntity.ok(Map.of("Appointments", appointments), HttpStatus.OK);
+            return ResponseEntity.ok(Map.of("Appointments", appointments));
         } catch (Exception e) {
             // TODO: handle exception
             return new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -205,7 +205,7 @@ public class PatientService {
         return new ResponseEntity<>(Map.of("Details", patient), HttpStatus.OK);
         } catch (Exception e) {
             // TODO: handle exception
-            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
     }

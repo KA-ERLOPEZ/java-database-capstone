@@ -121,4 +121,26 @@ public class AppointmentService {
         }
     }
 
+    public Map<String, Object> getAppointment(String pname, LocalDate date, String token){
+
+        String emailToken = tokenService.extractEmail(token);
+
+        Doctor doctor = doctorRepository.findByEmail(emailToken);
+
+        List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctor.getId(), date.atStartOfDay().plusHours(7), date.atStartOfDay().plusHours(17));
+
+        return Map.of("Appointments", appointments);
+    }
+
+    public ResponseEntity<Map<String,String>>cancelAppointment(Long id, String token){
+
+        boolean isValidToken = service.validateToken(token, "USER").getStatusCode() == 200 ? true : false;
+
+        if (!isValidToken) {
+            
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Message", "UNAUTHORIZED"));
+        }
+
+    }
+
 }
