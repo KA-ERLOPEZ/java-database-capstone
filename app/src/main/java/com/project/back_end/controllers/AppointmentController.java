@@ -121,7 +121,7 @@ public class AppointmentController {
             return responseToken;
         }
 
-        return new ResponseEntity<>(appointmentService.updateAppointment(appointment));
+        return new ResponseEntity<>(appointmentService.updateAppointment(appointment), HttpStatus.OK);
     }
 
     // 6. Define the `cancelAppointment` Method:
@@ -144,7 +144,7 @@ public class AppointmentController {
                     .body("Invalid token or unauthorized access to cancel this appointment.");
         }
 
-        return appointmentService.cancelAppointment(appointmentId);
+        return appointmentService.cancelAppointment(appointmentId, token);
     }
 
 }

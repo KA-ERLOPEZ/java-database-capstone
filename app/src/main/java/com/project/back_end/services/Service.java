@@ -248,14 +248,14 @@ public class Service {
         boolean hasCondition = condition != null && !condition.trim().isEmpty();
         boolean hasDoctorName = name != null && !name.trim().isEmpty();
     
-        List<Appointment> filteredAppointments;
+       // List<Appointment> filteredAppointments;
     
          if (hasCondition && hasDoctorName) {
             // Combinación A: Ambos filtros activos
-            filteredAppointments = patientService.filterByDoctorAndCondition(condition, name.trim(), patient.getId());
+           /* filteredAppointments = */return patientService.filterByDoctorAndCondition(condition, name.trim(), patient.getId());
         } else if (hasCondition) {
             // Combinación B: Solo filtro de condición médica
-            filteredAppointments = patientService.filterByCondition(condition.trim(), patient.getId());
+            /*filteredAppointments = */return patientService.filterByCondition(condition.trim(), patient.getId());
         } else if (hasDoctorName) {
             // Combinación C: Solo filtro por nombre de doctor
             filteredAppointments = patientService.filterByDoctor(name.trim(), patient.getId());

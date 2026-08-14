@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.models.Appointment;
@@ -161,17 +162,17 @@ public class PatientService {
             Long patientId) {
         try {
             if (name == null || name.isEmpty()) {
-                return new ResponseEntity<>(Map.of("Error", "Invalid name"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Error", "Invalid name"));
             }
-            Optional<Patient> existsPatient = patientRepository.findById(id);
+            Optional<Patient> existsPatient = patientRepository.findById(patientId);
             if (existsPatient.isEmpty()) {
 
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Error", "Patitent not found"));
             }
 
             if (!condition.equalsIgnoreCase(PAST) && !condition.equalsIgnoreCase(FUTURE)) {
-                return ResponseEtity.status(HttpStatus.BAD_REQUEST).bMap(.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'");
-)            }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Error", "Invalid condition: enter 'FUTERE' or 'PAST'"));
+           }
 
             int statusTarget = (condition == FUTURE) ? 1 : 0;
 
@@ -179,10 +180,10 @@ public class PatientService {
                     .stream().filter(appointment -> appointment.getStatus() == statusTarget).map(this::toAppointmentDTO)
                     .toList();
 
-            return new ResponseEntity<>(Map.of("Appointments", appointments));
+            return new ResponseEntity<>(Map.of("Appointments", appointments), HttpStatus.OK);
         } catch (Exception e) {
             // TODO: handle exception
-            return new ResponseEntity<>(Map.of("Error", e.getMessage()));
+            return new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

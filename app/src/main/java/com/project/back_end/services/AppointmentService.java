@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -86,25 +87,29 @@ public class AppointmentService {
     @Transactional
     public ResponseEntity <Map<String, String>> updateAppointment (Appointment appointment){
 
-        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointment.getId);
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointment.getId());
 
         if(optionalAppointment.isEmpty()){
-            return Map.of("Message", "Appointment not found");
+            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment not found"));
         }
 
         int validateAppointment= service.validateAppointment(appointment);
 
         if(validateAppointment == 0){
-            return Map.of( "Message", "Appointment not available");
+
+            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of( "Message", "Appointment not available"));
+            
         }
 
         if(validateAppointment == -1){
-            return Map.of("Message", "Doctor does not exist");
+
+            return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Doctor does not exist"));
+
         }
 
         appointmentRepository.save(appointment);
 
-        return Map.of("Message", "Appointment successfully registered");
+        return RepsonseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment successfully registered"));
 
 
     }
@@ -125,20 +130,20 @@ public class AppointmentService {
     public ResponseEntity<Map<String, String>> cancelAppointment(Long id, String token){
         String emailToken = tokenService.extractEmail(token);
         Patient patient = patientRepository.findByEmail(emailToken);
-        Appointment optionalAppointment = appointmentRepository.findById(id);
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
 
         if (optionalAppointment.isEmpty()) {
-            return new ResponseEntity<>(Map.of("Message", "Appointment not found"));
+            return new ResponseEntity<>(Map.of("Message", "Appointment not found"), HttpStatus.NOT_FOUND);
         }
 
-        if (optionalAppointment.getPatient().getId() !=  patient.getId) {
+        if (optionalAppointment.get().getPatient().getId() !=  patient.getId()) {
 
-            return new ResponseEntity<>(Map.of("Message", "User unauthorized"));
+            return new ResponseEntity<>(Map.of("Message", "User unauthorized"), HttpStatus.ANAUTHORIZED);
         }
 
         appointmentRepository.delete(optionalAppointment);
 
-        return new ResponseEntity<>(Map.of("Message", "Appointment deleted succesfully"));
+        return new ResponseEntity<>(Map.of("Message", "Appointment deleted succesfully"), HttpStatus.OK);
     }
 
     // 7. **Get Appointments Method**:
