@@ -89,7 +89,7 @@ public class DoctorController {
     public ResponseEntity<?> saveDoctor(@PathVariable String token, @RequestBody Doctor doctor) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, "admin");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;
@@ -138,7 +138,7 @@ public class DoctorController {
     public ResponseEntity<?> updateDoctor(@PathVariable String token, @RequestBody Doctor doctor) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, "admin");
-        boolean validateToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean validateToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!validateToken) {
             return responseToken;
@@ -166,7 +166,7 @@ public class DoctorController {
     @DeleteMapping("/{id}/{token}")
     public ResponseEntity<?> deleteDoctor(@PathVariable Long id, @PathVariable String token) {
         ResponseEntity<?> responseToken = service.validateToken(token, "admin");
-        boolean validateToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean validateToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!validateToken) {
             return responseToken;

@@ -3,6 +3,7 @@ package com.project.back_end.services;
 import java.util.Map;
 import java.util.Optional;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
@@ -63,7 +64,8 @@ public class PrescriptionService {
             return new ResponseEntity<>(Map.of("Success", "Prescription saved"), HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("Error saving prescription.", e);
-            return new ResponseEntity<>(Map.of("Error", "Internal server error"), HttpStatus.SERVER_INTERNAL_ERROR);
+            return new ResponseEntity<>(Map.of("Error", "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            
         }
     }
 
@@ -84,13 +86,13 @@ public class PrescriptionService {
             response.put("status", HttpStatus.OK.value());
             response.put("message", "Prescription retrieved successfully.");
             response.put("prescription", prescriptions);
-            return new ResponseEntity<>(response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error retrieving prescription.", e);
 
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.put("message", "Unable to retrieve prescription.");
-            return new ResponseEntity<>(response);
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 
         }
     }

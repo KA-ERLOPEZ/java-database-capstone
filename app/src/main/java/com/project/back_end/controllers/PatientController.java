@@ -48,7 +48,7 @@ public class PatientController {
     public ResponseEntity<?> getPatient (@PathVariable String token){
 
         ResponseEntity<?> responseToken = service.validateToken(token, "patient");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;
@@ -92,7 +92,7 @@ public class PatientController {
     @PostMapping("/login")
     public ResponseEntity<?> login (@RequestBody Login login){
 
-        return service.validatePatientLogin(Login);
+        return service.validatePatientLogin(login);
     }
 
     // 6. Define the `getPatientAppointment` Method:
@@ -105,13 +105,13 @@ public class PatientController {
     @GetMapping("/{id}/{token}")
     public ResponseEntity<?> getPatientAppointment(@PathVariable Long id, @PathVariable String token){
         ResponseEntity<?> responseToken = service.validateToken(token, "patient");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;
         }
 
-        return new ResponseEntity.ok (patientService.getPatientAppointment(id, token));
+        return ResponseEntity.ok (patientService.getPatientAppointment(id, token));
     }
 
     // 7. Define the `filterPatientAppointment` Method:
@@ -124,7 +124,7 @@ public class PatientController {
     @GetMapping("/filter/{condition}/{name}/{token}")
     public ResponseEntity<?> filterPatientAppointment(@PathVariable String condition, @PathVariable String name, @PathVariable String token){
         ResponseEntity<?> responseToken = service.validateToken(token, "patient");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;

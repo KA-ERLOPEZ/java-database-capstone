@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +19,9 @@ import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.services.Service;
 
-@Service
+@org.springframework.stereotype.Service
 public class AppointmentService {
     // 1. **Add @Service Annotation**:
     // - To indicate that this class is a service layer class for handling business
@@ -98,9 +98,19 @@ public class AppointmentService {
 
         if(validateAppointment == 0){
 
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", "Schedule not available"));
+
         }
 
-        return Map.of("appointments", appointments);
+        if(validateAppointment == -1){
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", "Doctor not available"));
+
+        }
+
+        Appointment updateAppoinment = appointmentRepository.save(appointment);
+
+        return ResponseEntity.ok(Map.of("Success", "Appointment updated"));
         
     }
 
@@ -134,12 +144,23 @@ public class AppointmentService {
 
     public ResponseEntity<Map<String,String>>cancelAppointment(Long id, String token){
 
-        boolean isValidToken = service.validateToken(token, "USER").getStatusCode() == 200 ? true : false;
+        try {
+            boolean isValidToken = service.validateToken(token, "USER").getStatusCode().value() == 200 ? true : false;
 
         if (!isValidToken) {
             
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Message", "UNAUTHORIZED"));
         }
+
+        appointmentRepository.deleteById(id);
+
+        return ResponseEntity.ok(Map.of("Success", "Appointment cancelled"));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Message", "An error occurred. Please try again."));
+        }
+
+
 
     }
 

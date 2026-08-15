@@ -56,7 +56,7 @@ public class PrescriptionController {
     public ResponseEntity<?> savePrescription(@PathVariable String token, @RequestBody Prescription prescription) {
 
         ResponseEntity<?> responseToken = service.validateToken(token, "doctor");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;
@@ -77,7 +77,7 @@ public class PrescriptionController {
     @GetMapping("/{appointmentId}/{token}")
     public ResponseEntity<?> getPrescription(@PathVariable Long appointmentId, @PathVariable String token){
         ResponseEntity<?> responseToken = service.validateToken(token, "doctor");
-        boolean isValidaToken = responseToken.getHttpStatusCode().value() == 200 ? true : false;
+        boolean isValidaToken = responseToken.getStatusCode().value() == 200 ? true : false;
 
         if (!isValidaToken) {
             return responseToken;
