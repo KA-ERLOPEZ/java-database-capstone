@@ -42,8 +42,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     List<Doctor> findByNameLike(String name);
 
-
-
     // - **findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase**:
     // - This method retrieves a list of Doctors where the name contains the search string (case-insensitive)
     // - and the specialty matches exactly (case-insensitive).

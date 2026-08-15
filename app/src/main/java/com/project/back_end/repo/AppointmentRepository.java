@@ -80,11 +80,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // - Return type: List<Appointment>
     // - Parameters: String doctorName, Long patientId
     @Query("""
-            SELECT a FROM Appointment a
-            WHERE LOWER(a.doctor.name) LIKE LOWER(CONCAT('%', :doctorName, '%')) 
-            AND patientId = :patientId
+                SELECT a FROM Appointment a
+                WHERE LOWER(a.doctor.name) LIKE LOWER(CONCAT('%', :doctorName, '%'))
+                AND a.patient.id = :patientId
             """)
-    public List<Appointment> filterByDoctorNameAndPatientId(String doctorName, Long patientId);
+    List<Appointment> filterByDoctorNameAndPatientId(
+            @Param("doctorName") String doctorName,
+            @Param("patientId") Long patientId);
 
     // - **filterByDoctorNameAndPatientIdAndStatus**:
     // - This method retrieves appointments based on a doctor’s name (using a LIKE
