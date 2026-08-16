@@ -3,6 +3,7 @@ package com.project.back_end.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("${api.path}admin")
+//@RequestMapping("admin")
 public class AdminController {
 
 // 1. Set Up the Controller Class:
@@ -39,6 +41,7 @@ public AdminController(Service service){
 //    - Accepts an `Admin` object in the request body, which contains login credentials.
 //    - Delegates authentication logic to the `validateAdmin` method in the service layer.
 //    - Returns a `ResponseEntity` with a `Map` containing login status or messages.
+@PostMapping
 public ResponseEntity<Map <String, String>> adminLogin(@RequestBody Admin admin){
 
     return service.validateAdmin(admin);

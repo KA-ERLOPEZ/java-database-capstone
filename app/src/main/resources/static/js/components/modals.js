@@ -72,10 +72,15 @@ export function openModal(type) {
       `;
   }
 
-  document.getElementById('modal-body').innerHTML = modalContent;
+  document.getElementById('modal-content').innerHTML = modalContent;
+  
+  const modalOverlay = document.getElementById('modal-overlay');
+  if (modalOverlay) {
+    modalOverlay.classList.remove('hidden');
+  }
   document.getElementById('modal').style.display = 'block';
 
-  document.getElementById('closeModal').onclick = () => {
+  document.getElementById('close-modal').onclick = () => {
     document.getElementById('modal').style.display = 'none';
   };
 
