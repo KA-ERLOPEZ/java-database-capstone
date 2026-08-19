@@ -27,14 +27,14 @@
                 />
 
                 <!-- Filtro por horario -->
-                <select id="timeFilter">
+                <select id="filterTime">
                     <option value="">All times</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                 </select>
 
                 <!-- Filtro por especialidad -->
-                <select id="specialtyFilter">
+                <select id="filterSpecialty">
                     <option value="">All specialities</option>
                     <option value="Cardiologist">Cardiologist</option>
                     <option value="Dentist">Dentist</option>
@@ -52,10 +52,10 @@
 
     <div id="modal" class="modal">
         <span id="closeModal" class="close">&times;</span>
-        <div id="modal-body"></div>
+        <div id="modal-content"></div>
     </div>
 
-    <script type="module" th:src="@{/js/services/adminDashboard.js}" defer></script>
+    <script type="module" th:src="@{/js/adminDashboard.js}" defer></script>
     <script type="module" th:src="@{/js/components/doctorCard.js}" defer></script>
 </body>
 </html>

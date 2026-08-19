@@ -42,7 +42,7 @@ async function loadDoctorCards() {
 
         contentDiv.innerHTML = "";
 
-        doctors.array.forEach(doctor => {
+        doctors.forEach(doctor => {
             const doctorCard = createDoctorCard(doctor);
             contentDiv.appendChild(doctorCard);
         });

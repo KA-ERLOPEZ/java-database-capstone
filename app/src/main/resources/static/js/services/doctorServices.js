@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config/config";
+import { API_BASE_URL } from "../config/config.js";
 
 
 const DOCTOR_API = API_BASE_URL + '/doctor';
@@ -45,7 +45,7 @@ async function getDoctors() {
     - message: message from the server
    If an error occurs, log it and return a default failure response
    */
-async function deleteDoctor(id, token) {
+export async function deleteDoctor(id, token) {
 
     try {
         const response = await fetch(`${DOCTOR_API}/${id}`, {

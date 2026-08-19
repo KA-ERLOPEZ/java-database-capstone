@@ -23,8 +23,8 @@ window.onload = function () {
 };
 
 window.adminLoginHandler = async function () {
-    const username = document.getElementById('adminUsername');
-    const password = document.getElementById('adminPassword');
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
     const admin = { username, password };
 
@@ -53,8 +53,8 @@ window.adminLoginHandler = async function () {
 };
 
 window.dotorLoginHandler = async function () {
-    const username = document.getElementById('doctorUsername').value;
-    const password = document.getElementById('doctorPassword').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
     const doctorCredentials = { username, password };
 
