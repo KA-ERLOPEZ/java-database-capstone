@@ -164,14 +164,10 @@ window.adminAddDoctor = async function () {
         document.getElementById("doctorPassword").value;
 
     const specialization =
-        document.getElementById("doctorSpecialization").value;
+        document.getElementById("specialization").value;
 
-    const availableTimes =
-        document.getElementById("doctorAvailableTimes")
-            .value
-            .split(",")
-            .map(time => time.trim());
-
+    const selectedElements = document.querySelector('input[name="availability"]:checked');
+    const availableTimes = Array.from(selectedElements).map(checkbox => checkbox.value);
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -180,18 +176,18 @@ window.adminAddDoctor = async function () {
     }
 
     const doctor = {
-        name,
-        email,
-        phone,
-        password,
-        specialization,
-        availableTimes
+        'name':name,
+        'email':email,
+        'phone':phone,
+        'password': password,
+        'specialty': specialization,
+        'availableTimes': availableTimes
     };
 
     try {
-        await saveDoctor(doctor, token);
+        const response = await  saveDoctor(doctor, token);
 
-        alert("Doctor added successfully.");
+        alert(response);
 
         window.location.reload();
 

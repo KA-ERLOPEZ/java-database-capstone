@@ -50,9 +50,19 @@
         </div>
     </div>
 
-    <div id="modal" class="modal">
-        <span id="closeModal" class="close">&times;</span>
-        <div id="modal-content"></div>
+    <div id="modal-overlay" class="modal-overlay hidden">
+
+        <div id="modal" class="modal">
+
+            <button id="close-modal" class="close-btn">
+                &times;
+            </button>
+
+            <!-- Dynamic Modal Content -->
+            <div id="modal-content"></div>
+
+        </div>
+
     </div>
 
     <script type="module" th:src="@{/js/adminDashboard.js}" defer></script>

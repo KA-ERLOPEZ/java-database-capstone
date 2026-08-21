@@ -29,7 +29,7 @@ async function getDoctors() {
         return [];
     } catch (error) {
         console.error(" error:", error);
-       // alert("Something went wrong. Please try again.");
+        // alert("Something went wrong. Please try again.");
         return [];
     }
 }
@@ -58,16 +58,16 @@ export async function deleteDoctor(id, token) {
 
         if (response.ok) {
             const data = await response.json();
-           // alert("Delete doctor successfuly: ", data.message);
-            return {'success':true, 'message': data.message};
+            // alert("Delete doctor successfuly: ", data.message);
+            return { 'success': true, 'message': data.message };
         } else {
             //alert("The record could not be deleted");
-            return {'success':false, 'message': data.message};;
+            return { 'success': false, 'message': data.message };;
         }
 
     } catch (error) {
         console.error(" error:", error);
-       // alert("Something went wrong. Please try again.");
+        // alert("Something went wrong. Please try again.");
         return error;
     }
 
@@ -89,52 +89,56 @@ Purpose: Save (create) a new doctor using a POST request
   - Return a failure response if an error occurs
   */
 
-  async function saveDoctor(doctor, token){
+async function saveDoctor(doctor, token) {
 
     try {
-        const response = await fetch(DOCTOR_API,{
-        method:'POST',
-        headers:{
-            'Authorization':`Bearer ${token}`,
-            'Content-type':'application/json'
-        },
-        body: JSON.stringify(doctor)
-    });
-    if (response.ok) {
-        const data = await response.json();
-       // alert("Doctor saving  successfuly: ", data.message);
-        return {'success': true, 'message': data.message};
-    } else {
-        //alert("Error saving the doctor");
-        return {'success':false, 'message': data.message};;
-    }
+        const response = await fetch(`${DOCTOR_API}/${token}`, {
+            method: 'POST',
+            headers: {
+                //'Authorization':`Bearer ${token}`,
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(doctor)
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (response.status === 200) {
+                // alert("Doctor saving  successfuly: ", data.message);
+                return { 'success': true, 'message': data.success };
+
+            } else {
+                //alert("Error saving the doctor");
+                return { 'success': false, 'message': data.error };;
+            }
+
+        }
     } catch (error) {
-        console.error(" error:", error);
+        console.error(" error:", error.message);
         //alert("Something went wrong. Please try again.");
         return error;
     }
-  }
- /*
+}
+/*
 Function: filterDoctors
 Purpose: Fetch doctors based on filtering criteria (name, time, and specialty)
 
- Use fetch() with the GET method
-  - Include the name, time, and specialty as URL path parameters
- Check if the response is OK
-  - If yes, parse and return the doctor data
-  - If no, log the error and return an object with an empty 'doctors' array
+Use fetch() with the GET method
+ - Include the name, time, and specialty as URL path parameters
+Check if the response is OK
+ - If yes, parse and return the doctor data
+ - If no, log the error and return an object with an empty 'doctors' array
 
- Catch any other errors, alert the user, and return a default empty result
+Catch any other errors, alert the user, and return a default empty result
 */
-async function filterDoctors(filters={}, token){
+async function filterDoctors(filters = {}, token) {
 
     const params = new URLSearchParams(filters).toString();
-    const urlWithParams = params?`${DOCTOR_API}?${params}`:DOCTOR_API;
+    const urlWithParams = params ? `${DOCTOR_API}?${params}` : DOCTOR_API;
 
     try {
         const response = await fetch(urlWithParams, {
-            method:'GET',
-            headers:{
+            method: 'GET',
+            headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-type': 'application/json'
             }
@@ -142,17 +146,17 @@ async function filterDoctors(filters={}, token){
         if (response.ok) {
             return await response.json();
         }
-        
+
         alert("The data could not be obtained");
         return [];
     } catch (error) {
         console.error(" error:", error);
         //alert("Something went wrong. Please try again.");
         return [];
-        
+
     }
 
-     
+
 }
 
 export {
