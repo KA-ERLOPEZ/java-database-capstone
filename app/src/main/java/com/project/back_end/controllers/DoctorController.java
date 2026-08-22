@@ -98,15 +98,15 @@ public class DoctorController {
         int saveStatus = doctorService.saveDoctor(doctor);
 
         if (saveStatus == -1) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Doctor not found"));
         }
 
         if (saveStatus == 0) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "The doctor could not be saved. Please try again later."));
+                    .body(Map.of("message", "The doctor could not be saved. Please try again later."));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("success", "Doctor save successfuly"));
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Doctor save successfuly"));
 
     }
 

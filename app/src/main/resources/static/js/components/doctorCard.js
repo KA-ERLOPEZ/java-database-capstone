@@ -23,7 +23,7 @@ export function createDoctorCard(doctor) {
     email.textContent = `Email: ${doctor.email}`;
 
     const appointmentTimes = document.createElement("p");
-    appointmentTimes.textContent = `Available Times: ${doctor.allAvailableTimes?.join(", ") || "No times available"}`;
+    appointmentTimes.textContent = `Available Times: ${doctor.availableTimes?.join(", ") || "No times available"}`;
 
     doctorInfo.appendChild(name);
     doctorInfo.appendChild(specialization);

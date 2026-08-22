@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -107,12 +108,16 @@ public class Doctor {
         this.phone = phone;
     }
 
-    public List<String> getAllAvailableTimes() {
+    public List<String> getAvailableTimes() {
         return availableTimes;
     }
 
-    public void addAllAvailableTimes(List<String> availableTimes) {
-        this.availableTimes.addAll(availableTimes);
+    public void setAvailableTimes(List<String> availableTimes) {
+        if (availableTimes == null) {
+            this.availableTimes = new ArrayList<>();
+        } else {
+            this.availableTimes = availableTimes;
+        }
     }
 
 }

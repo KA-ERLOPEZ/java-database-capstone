@@ -91,8 +91,12 @@ Purpose: Save (create) a new doctor using a POST request
 
 async function saveDoctor(doctor, token) {
 
+    const uri = DOCTOR_API+'/'+ token;
+
+    
     try {
-        const response = await fetch(`${DOCTOR_API}/${token}`, {
+        console.log(uri);
+        const response = await fetch(uri, {
             method: 'POST',
             headers: {
                 //'Authorization':`Bearer ${token}`,
@@ -104,18 +108,18 @@ async function saveDoctor(doctor, token) {
             const data = await response.json();
             if (response.status === 200) {
                 // alert("Doctor saving  successfuly: ", data.message);
-                return { 'success': true, 'message': data.success };
+                return { 'success': true, 'message': data.message };
 
             } else {
                 //alert("Error saving the doctor");
-                return { 'success': false, 'message': data.error };;
+                return { 'success': false, 'message': data.message };;
             }
 
         }
     } catch (error) {
-        console.error(" error:", error.message);
+        console.error(" message:", error.errors);
         //alert("Something went wrong. Please try again.");
-        return error;
+        return { 'success': false, 'message': error.message };
     }
 }
 /*

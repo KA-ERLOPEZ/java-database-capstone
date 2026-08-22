@@ -86,7 +86,7 @@ public class DoctorService {
         Set<String> takenTimes = appointements.stream().map(Appointment::getAppointmentTimeOnly)
                 .map(dateTime -> dateTime.toString()).collect(Collectors.toSet());
 
-        return doctor.get().getAllAvailableTimes().stream().filter(time -> !takenTimes.contains(time)).toList();
+        return doctor.get().getAvailableTimes().stream().filter(time -> !takenTimes.contains(time)).toList();
     }
 
     // 5. **saveDoctor Method**:
@@ -99,7 +99,7 @@ public class DoctorService {
     public int saveDoctor(Doctor doctor) {
         try {
             Doctor findDoctorByEmail = doctorRepository.findByEmail(doctor.getEmail());
-            if (Objects.isNull(findDoctorByEmail)) {
+            if (!Objects.isNull(findDoctorByEmail)) {
                 return -1;
             }
 
@@ -107,6 +107,7 @@ public class DoctorService {
             return 1;
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             // TODO: handle exception
             return 0;
 
@@ -144,7 +145,7 @@ public class DoctorService {
     public List<Doctor> getDoctors() {
 
         List<Doctor> doctors = doctorRepository.findAll();
-        doctors.forEach(doctor -> doctor.getAllAvailableTimes().size());
+        doctors.forEach(doctor -> doctor.getAvailableTimes().size());
         return doctors;
     }
 
@@ -388,7 +389,7 @@ public class DoctorService {
             return true;
         }
 
-        List<String> availableTimes = doctor.getAllAvailableTimes();
+        List<String> availableTimes = doctor.getAvailableTimes();
         if (availableTimes == null || availableTimes.isEmpty()) {
             return false;
         }

@@ -163,12 +163,14 @@ window.adminAddDoctor = async function () {
     const password =
         document.getElementById("doctorPassword").value;
 
-    const specialization =
+    const specialty =
         document.getElementById("specialization").value;
 
-    const selectedElements = document.querySelector('input[name="availability"]:checked');
+    const selectedElements = document.querySelectorAll('input[name="availability"]:checked');
     const availableTimes = Array.from(selectedElements).map(checkbox => checkbox.value);
     const token = localStorage.getItem("token");
+
+    console.log(availableTimes);
 
     if (!token) {
         alert("Authentication token not found.");
@@ -176,23 +178,24 @@ window.adminAddDoctor = async function () {
     }
 
     const doctor = {
-        'name':name,
-        'email':email,
-        'phone':phone,
-        'password': password,
-        'specialty': specialization,
-        'availableTimes': availableTimes
+        name,
+        email,
+        phone,
+        password,
+        specialty,
+        availableTimes
     };
 
     try {
+        console.log(doctor.availableTimes);
         const response = await  saveDoctor(doctor, token);
 
-        alert(response);
+        alert(response.message);
 
-        window.location.reload();
+       // window.location.reload();
 
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
         alert("Error adding doctor.");
     }
 };
