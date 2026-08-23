@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframeword.transaction.annotation.Transactional;
 
 @org.springframework.stereotype.Service
 public class Service {
@@ -100,17 +101,17 @@ public class Service {
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
             if (!existsAdmin.getPassword().equals(admin.getPassword())) {
-                response.put("Error", "Invalid email or password");
+                response.put("message", "Invalid email or password");
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
 
             String token = tokenService.generateToken(admin.getUsername());
-            response.put("Success", "Successful login");
+            response.put("message", "Successful login");
             response.put("token", token);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (Exception e) {
-            response.put("Error", "An error has occurred. Please try again later.");
+            response.put("messasge", "An error has occurred. Please try again later.");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -123,17 +124,31 @@ public class Service {
     // - If none of the filters are provided, it returns all available doctors.
     // This flexible filtering mechanism allows the frontend or consumers of the API
     // to search and narrow down doctors based on user criteria.
+    @Transactional(readOnly = true)
     public Map<String, Object> filterDoctor(String name, String specialty, String time) {
 
-        // Contar cuantos filtros son nulos o vacios
-        long activeFilterCount = Stream.of(name, specialty, time)
-                .filter(filter -> filter != null || !filter.isEmpty()).count();
-        Map<String, Object> response = new HashMap<>();
-        if (activeFilterCount == 0) {
-            response.put("Doctors", doctorRepository.findAll());
-            return response;
+        // 1. Limpiar cadenas "null" o vacías
+        String cleanName = (name != null && !name.trim().isEmpty() && !name.equalsIgnoreCase("null")) ? name : null;
+        String cleanSpecialty = (specialty != null && !specialty.trim().isEmpty()
+                && !specialty.equalsIgnoreCase("null")) ? specialty : null;
+        String cleanTime = (time != null && !time.trim().isEmpty() && !time.equalsIgnoreCase("null")) ? time : null;
+
+        // 2. Contar cuántos filtros NO son nulos (filtros activos)
+        long activeFilters = Stream.of(cleanName, cleanSpecialty, cleanTime)
+                .filter(Objects::nonNull)
+                .count();
+
+        List<Doctor> doctors;
+
+        // Si NO hay filtros activos, devolver todos. Si hay al menos 1, filtrar.
+        if (activeFilters == 0) {
+            doctors = doctorRepository.findAll(); // Usando el Join Fetch
+        } else {
+            doctors = doctorRepository.findByDynamicFilters(cleanName, cleanSpecialty, cleanTime);
         }
-        response.put("Doctors", doctorRepository.findByDynamicFilters(name, specialty, time));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("Doctors", doctors);
         return response;
 
     }
@@ -162,12 +177,13 @@ public class Service {
 
         String appointmentTime = appointment.getAppointmentTimeOnly().toString();
 
-        boolean isAvailableTime = doctorService.getDoctorAvailability(doctorOpt.get().getId(), appointment.getAppointmentDate())
-                                .stream().anyMatch(time -> time.equals(appointmentTime));
-
+        boolean isAvailableTime = doctorService
+                .getDoctorAvailability(doctorOpt.get().getId(), appointment.getAppointmentDate())
+                .stream().anyMatch(time -> time.equals(appointmentTime));
 
         return isAvailableTime ? 1 : 0;
     }
+
     // 7. **validatePatient Method**
     // This method checks whether a patient with the same email or phone number
     // already exists in the system.
@@ -176,7 +192,7 @@ public class Service {
     // - If no match is found, it returns true.
     // This helps enforce uniqueness constraints on patient records and prevent
     // duplicate entries.
-    public boolean validatePatient (Patient patient){
+    public boolean validatePatient(Patient patient) {
         Patient existPatient = patientRepository.findByEmail(patient.getEmail());
         if (!Objects.isNull(existPatient)) {
             return false;
@@ -199,26 +215,25 @@ public class Service {
     public ResponseEntity<Map<String, String>> validatePatientLogin(Login login) {
         Map<String, String> response = new HashMap<>();
         String errorMessage = "Invalid email or password";
-    
+
         // 1. Buscar al paciente por su correo electrónico
         Patient patient = patientRepository.findByEmail(login.getEmail());
-    
+
         // 2. Error genérico si el correo no existe
-        if (Objects.isNull(patient)){
+        if (Objects.isNull(patient)) {
             response.put("error", errorMessage);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-    
-    
+
         // 3. Error genérico si la contraseña no coincide
         if (!patient.getPassword().equals(login.getPassword())) {
             response.put("error", errorMessage);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-    
+
         // 4. Generar el token si las credenciales son válidas
         String token = tokenService.generateToken(patient.getEmail());
-    
+
         // 5. Retornar el token con estado 200 OK
         response.put("token", token);
         return ResponseEntity.ok(response);
@@ -235,7 +250,7 @@ public class Service {
     // experience on the client side.
     public ResponseEntity<Map<String, Object>> filterPatient(String condition, String name, String token) {
         Map<String, Object> response = new HashMap<>();
-    
+
         String patientEmail = tokenService.extractEmail(token);
 
         Patient patient = patientRepository.findByEmail(patientEmail);
@@ -244,29 +259,31 @@ public class Service {
             response.put("Error", "Patient not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-    
+
         boolean hasCondition = condition != null && !condition.trim().isEmpty();
         boolean hasDoctorName = name != null && !name.trim().isEmpty();
-    
+
         List<Appointment> filteredAppointments;
-    
-         if (hasCondition && hasDoctorName) {
+
+        if (hasCondition && hasDoctorName) {
             // Combinación A: Ambos filtros activos
-           /* filteredAppointments = */return patientService.filterByDoctorAndCondition(condition, name.trim(), patient.getId());
+            /* filteredAppointments = */return patientService.filterByDoctorAndCondition(condition, name.trim(),
+                    patient.getId());
         } else if (hasCondition) {
             // Combinación B: Solo filtro de condición médica
-            /*filteredAppointments = */return patientService.filterByCondition(condition.trim(), patient.getId());
+            /* filteredAppointments = */return patientService.filterByCondition(condition.trim(), patient.getId());
         } else if (hasDoctorName) {
             // Combinación C: Solo filtro por nombre de doctor
-            /*filteredAppointments = */return patientService.filterByDoctor(name.trim(), patient.getId());
+            /* filteredAppointments = */return patientService.filterByDoctor(name.trim(), patient.getId());
         } else {
-            // Combinación D: Ningún filtro provisto (retorna el historial completo del paciente)
+            // Combinación D: Ningún filtro provisto (retorna el historial completo del
+            // paciente)
             filteredAppointments = Collections.emptyList();
         }
-    
+
         // 4. Empaquetar el resultado en el mapa y responder con éxito 200 OK
         response.put("appointments", filteredAppointments);
-        
+
         return ResponseEntity.ok(response);
     }
 

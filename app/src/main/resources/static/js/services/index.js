@@ -52,11 +52,11 @@ window.adminLoginHandler = async function () {
     }
 };
 
-window.dotorLoginHandler = async function () {
-    const username = document.getElementById('username').value;
+window.doctorLoginHandler = async function () {
+    const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const doctorCredentials = { username, password };
+    const doctorCredentials = { email, password };
 
     try {
         const response = await fetch(DOCTOR_API, {
