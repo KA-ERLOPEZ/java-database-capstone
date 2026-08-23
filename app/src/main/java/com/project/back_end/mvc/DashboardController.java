@@ -50,6 +50,7 @@ public class DashboardController {
     // - If the token is valid, forwards the user to the `"doctor/doctorDashboard"`
     // view.
     // - If the token is invalid, redirects to the root URL.
+    @GetMapping("/doctorDashboard/{token}")
     public String doctorDashboard(@PathVariable String token){
         boolean validateToken = service.validateToken(token, "doctor").getStatusCode().value() == 200 ? true : false;
 

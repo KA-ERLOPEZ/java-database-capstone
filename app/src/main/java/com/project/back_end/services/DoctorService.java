@@ -184,11 +184,11 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findByEmail(login.getEmail());
 
         if (Objects.isNull(doctor)) {
-            return Map.of("Message", "Email or password invalid");
+            return Map.of("message", "Email or password invalid");
         }
 
         if (doctor.isAccountLocked()) {
-            return Map.of("Message", "User locked");
+            return Map.of("message", "User locked");
         }
 
         if (!doctor.getPassword().equals(login.getPassword())) {
@@ -202,7 +202,7 @@ public class DoctorService {
 
             doctorRepository.save(doctor);
 
-            return Map.of("Message", "Email or password invalid");
+            return Map.of("message", "Email or password invalid");
         }
 
         doctor.setFailedAttempts(0);
@@ -210,7 +210,7 @@ public class DoctorService {
 
         String token = tokenService.generateToken(doctor.getEmail());
 
-        return Map.of("Token", token);
+        return Map.of("token", token);
     }
 
     // 10. **findDoctorByName Method**:
