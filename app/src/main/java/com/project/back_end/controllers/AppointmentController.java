@@ -83,24 +83,24 @@ public class AppointmentController {
         boolean isValidToken = service.validateToken(token, "patient").getStatusCode().value() == 200 ? true : false;
 
         if (validateAppointment == -1) {
-            return new ResponseEntity<>(Map.of("Error", "Doctor not found"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Map.of("message", "Doctor not found"), HttpStatus.BAD_REQUEST);
         }
 
         if (validateAppointment == 0) {
-            return new ResponseEntity<>(Map.of("Error", "Invalid time"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Map.of("message", "Invalid time"), HttpStatus.BAD_REQUEST);
         }
 
         if (isValidToken) {
-            return new ResponseEntity<>(Map.of("Error", "You do not have permission"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Map.of("message", "You do not have permission"), HttpStatus.UNAUTHORIZED);
         }
 
         int saveStatus = appointmentService.bookAppointment(appointment);
 
         if (saveStatus == 0) {
-            return new ResponseEntity<>(Map.of("Error", "The appointment could not be saved"),
+            return new ResponseEntity<>(Map.of("error", "The appointment could not be saved"),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("Succes", "Appointment saved"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Appointment saved"));
     }
 
     // 5. Define the `updateAppointment` Method:

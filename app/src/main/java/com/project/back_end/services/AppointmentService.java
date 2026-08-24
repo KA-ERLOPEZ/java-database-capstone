@@ -21,6 +21,9 @@ import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
 import com.project.back_end.services.Service;
 
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+
 @org.springframework.stereotype.Service
 public class AppointmentService {
     // 1. **Add @Service Annotation**:
@@ -131,15 +134,41 @@ public class AppointmentService {
         }
     }
 
-    public Map<String, Object> getAppointment(String pname, LocalDate date, String token){
+    public Map<String, Object> getAppointment(String pname, LocalDate date, String token) {
 
         String emailToken = tokenService.extractEmail(token);
-
         Doctor doctor = doctorRepository.findByEmail(emailToken);
-
-        List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctor.getId(), date.atStartOfDay().plusHours(7), date.atStartOfDay().plusHours(17));
-
-        return Map.of("Appointments", appointments);
+    
+        if (doctor == null) {
+            return Map.of("appointments", List.of());
+        }
+    
+        // Construcción dinámica de la consulta
+        Specification<Appointment> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+    
+            // 1. Filtro obligatorio por el Doctor autenticado
+            predicates.add(cb.equal(root.get("doctor").get("id"), doctor.getId()));
+    
+            // 2. Filtro opcional por nombre/apellido del Paciente
+            if (pname != null && !pname.trim().isEmpty()) {
+                // Asumiendo que la relación es root.get("patient").get("name")
+                predicates.add(cb.like(cb.lower(root.get("patient").get("name")), "%" + pname.toLowerCase().trim() + "%"));
+            }
+    
+            // 3. Filtro opcional por Rango de Fecha (7:00 a 17:00)
+            if (date != null) {
+                LocalDateTime startOfDay = date.atStartOfDay().plusHours(7);
+                LocalDateTime endOfDay = date.atStartOfDay().plusHours(17);
+                predicates.add(cb.between(root.get("appointmentTime"), startOfDay, endOfDay));
+            }
+    
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    
+        List<Appointment> appointments = appointmentRepository.findAll(spec);
+    
+        return Map.of("appointments", appointments);
     }
 
     public ResponseEntity<Map<String,String>>cancelAppointment(Long id, String token){

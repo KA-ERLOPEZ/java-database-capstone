@@ -5,16 +5,16 @@
         <meta charset="UTF-8">
         <link rel="icon" type="image/png" th:href="@{/assets/images/logo/logo.png}" />
         <title>Doctor Dashboard</title>
-        <link rel="stylesheet" th:href="@{assets/css/doctorDashboard.css}">
-        <link rel="stylesheet" th:href="@{assets/css/adminDashboard.css}">
-        <link rel="stylesheet" th:href="@{assets/css/style.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/doctorDashboard.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/adminDashboard.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/style.css}">
         <script th:src="@{/js/render.js}"></script>
-        <script th:src="@{/js/util.js}"></script>
-        <script th:src="@{/js/doctorDashboard.js}" defer></script>
-        <script th:src="@{/js/components/header.js}" derfer></script>
-        <script th:src="@{/js/components/footer.js}" derfer></script>
+        <script  th:src="@{/js/util.js}"></script>
+        <script type="module" th:src="@{/js/doctorDashboard.js}"></script>
+        <script type="module" th:src="@{/js/components/header.js}"></script>
+        <script type="module" th:src="@{/js/components/footer.js}"></script>
     </head>
-    <body onload="renderConternt()">
+    <body onload="renderContent()">
         <div class="container">
             <div class="wrapper">
                 <div id="header"></div>

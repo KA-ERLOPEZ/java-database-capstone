@@ -63,7 +63,7 @@ datePicker.addEventListener('change', (event) => {
 */
 async function loadAppointments() {
     try {
-        const appointments = await getAllAppointments(selectedDate, patientName, token);
+        const response = await getAllAppointments(selectedDate, patientName, token);
         patientTableBody.innerHTML = "";
  /*
   Step 3: If no appointments are returned:
@@ -77,7 +77,7 @@ async function loadAppointments() {
 Step 5: Catch and handle any errors during fetch:
     - Show a message row: "Error loading appointments. Try again later."
 */
-if (appointments.length < 1) {
+if (response.appointments.length < 1) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td colspan="4">No Appointments found for today.</td>
@@ -86,7 +86,7 @@ if (appointments.length < 1) {
     return;
 }
 
-    appointments.forEach(appointment => {
+    response.appointments.forEach(appointment => {
 
         const patient = {
             id: appointment.patientId,
