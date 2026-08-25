@@ -2,6 +2,7 @@ package com.project.back_end.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
@@ -89,23 +89,23 @@ public class AppointmentService {
     // - Instruction: Ensure proper validation and error handling is included for
     // appointment updates.
     @Transactional
-    public ResponseEntity <Map<String, String>> updateAppointment (Appointment appointment){
+    public ResponseEntity<Map<String, String>> updateAppointment(Appointment appointment) {
 
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointment.getId());
 
-        if(optionalAppointment.isEmpty()){
+        if (optionalAppointment.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("Message", "Appointment not found"));
         }
 
-        int validateAppointment= service.validateAppointment(appointment);
+        int validateAppointment = service.validateAppointment(appointment);
 
-        if(validateAppointment == 0){
+        if (validateAppointment == 0) {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", "Schedule not available"));
 
         }
 
-        if(validateAppointment == -1){
+        if (validateAppointment == -1) {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("Message", "Doctor not available"));
 
@@ -114,7 +114,7 @@ public class AppointmentService {
         Appointment updateAppoinment = appointmentRepository.save(appointment);
 
         return ResponseEntity.ok(Map.of("Success", "Appointment updated"));
-        
+
     }
 
     // 8. **Change Status Method**:
@@ -125,7 +125,7 @@ public class AppointmentService {
     // - Instruction: Add `@Transactional` before this method to ensure atomicity
     // when updating appointment status.
     @Transactional
-    public Map<String, Boolean> changeStatus(int status, Long id){
+    public Map<String, Boolean> changeStatus(int status, Long id) {
         try {
             appointmentRepository.updateStatus(status, id);
             return Map.of("Success", true);
@@ -134,62 +134,74 @@ public class AppointmentService {
         }
     }
 
-    public Map<String, Object> getAppointment(String pname, LocalDate date, String token) {
+    public Map<String, Object> getAppointment(String pname, String dateStr, String token) {
 
         String emailToken = tokenService.extractEmail(token);
         Doctor doctor = doctorRepository.findByEmail(emailToken);
-    
+
         if (doctor == null) {
             return Map.of("appointments", List.of());
         }
-    
+
+        // Convertir String a LocalDate de forma segura
+        LocalDate date = null;
+        if (dateStr != null && !dateStr.trim().isEmpty() && !"null".equalsIgnoreCase(dateStr.trim())) {
+            try {
+                date = LocalDate.parse(dateStr.trim()); // Espera formato ISO (YYYY-MM-DD)
+            } catch (DateTimeParseException e) {
+                // Manejo si envían una fecha con formato inválido
+                date = null;
+            }
+        }
+
+        final LocalDate filterDate = date; // Variable final/efectiva para la lambda
+
         // Construcción dinámica de la consulta
         Specification<Appointment> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-    
+
             // 1. Filtro obligatorio por el Doctor autenticado
             predicates.add(cb.equal(root.get("doctor").get("id"), doctor.getId()));
-    
+
             // 2. Filtro opcional por nombre/apellido del Paciente
             if (pname != null && !pname.trim().isEmpty()) {
-                // Asumiendo que la relación es root.get("patient").get("name")
-                predicates.add(cb.like(cb.lower(root.get("patient").get("name")), "%" + pname.toLowerCase().trim() + "%"));
+                predicates.add(
+                        cb.like(cb.lower(root.get("patient").get("name")), "%" + pname.toLowerCase().trim() + "%"));
             }
-    
+
             // 3. Filtro opcional por Rango de Fecha (7:00 a 17:00)
-            if (date != null) {
-                LocalDateTime startOfDay = date.atStartOfDay().plusHours(7);
-                LocalDateTime endOfDay = date.atStartOfDay().plusHours(17);
+            if (filterDate != null) {
+                LocalDateTime startOfDay = filterDate.atStartOfDay().plusHours(7);
+                LocalDateTime endOfDay = filterDate.atStartOfDay().plusHours(17);
                 predicates.add(cb.between(root.get("appointmentTime"), startOfDay, endOfDay));
             }
-    
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-    
+
         List<Appointment> appointments = appointmentRepository.findAll(spec);
-    
+
         return Map.of("appointments", appointments);
     }
 
-    public ResponseEntity<Map<String,String>>cancelAppointment(Long id, String token){
+    public ResponseEntity<Map<String, String>> cancelAppointment(Long id, String token) {
 
         try {
             boolean isValidToken = service.validateToken(token, "USER").getStatusCode().value() == 200 ? true : false;
 
-        if (!isValidToken) {
-            
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Message", "UNAUTHORIZED"));
-        }
+            if (!isValidToken) {
 
-        appointmentRepository.deleteById(id);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("Message", "UNAUTHORIZED"));
+            }
 
-        return ResponseEntity.ok(Map.of("Success", "Appointment cancelled"));
-            
+            appointmentRepository.deleteById(id);
+
+            return ResponseEntity.ok(Map.of("Success", "Appointment cancelled"));
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Message", "An error occurred. Please try again."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("Message", "An error occurred. Please try again."));
         }
-
-
 
     }
 

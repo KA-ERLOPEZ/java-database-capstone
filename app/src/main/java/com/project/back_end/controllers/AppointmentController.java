@@ -53,7 +53,7 @@ public class AppointmentController {
     // - If the token is invalid or expired, responds with the appropriate message
     // and status code.
     @GetMapping("/{date}/{patientName}/{token}")
-    public ResponseEntity<?> getAppointments(@PathVariable LocalDate date, @PathVariable String patientName,
+    public ResponseEntity<?> getAppointments(@PathVariable String date, @PathVariable String patientName,
             @PathVariable String token) {
 
         ResponseEntity<?> responseValidateToken = this.service.validateToken(token, "doctor");

@@ -11,7 +11,7 @@ import { createPatientRow } from './components/patientRows.js';
   Initialize patientName to null (used for filtering by name)
 */
 const patientTableBody = document.getElementById('patientTableBody');
-let selectedDate = new Date().toISOString().split('T')[0];
+let selectedDate = null; //new Date().toISOString().split('T')[0];
 let patientName = null;
 const token = localStorage.getItem("token");
 /*
@@ -65,6 +65,8 @@ async function loadAppointments() {
     try {
         const response = await getAllAppointments(selectedDate, patientName, token);
         patientTableBody.innerHTML = "";
+
+        console.log(response.appointments);
  /*
   Step 3: If no appointments are returned:
     - Display a message row: "No Appointments found for today."
@@ -89,7 +91,7 @@ if (response.appointments.length < 1) {
     response.appointments.forEach(appointment => {
 
         const patient = {
-            id: appointment.patientId,
+            id: appointment.patient.id,
             name: appointment.name,
             phone: appointment.phone,
             email: appointment.email
@@ -98,7 +100,7 @@ if (response.appointments.length < 1) {
         const row = createPatientRow(
             patient,
             appointment.id,
-            appointment.doctorId
+            appointment.doctor.id
         );
 
         patientTableBody.appendChild(row);
