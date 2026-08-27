@@ -23,6 +23,8 @@ import com.project.back_end.services.Service;
 
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Fetch;
 
 @org.springframework.stereotype.Service
 public class AppointmentService {
@@ -134,7 +136,8 @@ public class AppointmentService {
         }
     }
 
-    public Map<String, Object> getAppointment(String pname, String dateStr, String token) {
+    @Transactional(readOnly = true)
+    public Map<String, Object> getAppointment(String name, String dateStr, String token) {
 
         String emailToken = tokenService.extractEmail(token);
         Doctor doctor = doctorRepository.findByEmail(emailToken);
@@ -154,10 +157,27 @@ public class AppointmentService {
             }
         }
 
+        if (name != null && !name.trim().isEmpty() && "null".equalsIgnoreCase(name.trim())) {
+            name = null;
+        }
+        final String pname = name;
+
         final LocalDate filterDate = date; // Variable final/efectiva para la lambda
 
         // Construcción dinámica de la consulta
         Specification<Appointment> spec = (root, query, cb) -> {
+
+            // Verificar que no sea una consulta de conteo (count query)
+            if (Long.class != query.getResultType()) {
+                // 1. Unirse y cargar el objeto Doctor
+                Fetch<Appointment, Doctor> doctorFetch = root.fetch("doctor", JoinType.LEFT);
+
+                // 2. Cargar los horarios disponibles pertenecientes a ese Doctor
+                doctorFetch.fetch("availableTimes", JoinType.LEFT);
+
+                // Evita duplicados causados por las uniones de colecciones
+                query.distinct(true);
+            }
             List<Predicate> predicates = new ArrayList<>();
 
             // 1. Filtro obligatorio por el Doctor autenticado

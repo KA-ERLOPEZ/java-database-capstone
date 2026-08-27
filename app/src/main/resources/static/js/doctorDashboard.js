@@ -50,8 +50,9 @@ todayButton.addEventListener('click', () => {
     - Update selectedDate with the new value
     - Reload the appointments for that specific date
 */
-datePicker.addEventListener('change', (event) => {
-    selectedDate = event.target.value;
+datePicker.addEventListener('change', () => {
+    selectedDate = datePicker.value;
+    console.log(selectedDate);
     loadAppointments();
 })
 /*
@@ -92,9 +93,9 @@ if (response.appointments.length < 1) {
 
         const patient = {
             id: appointment.patient.id,
-            name: appointment.name,
-            phone: appointment.phone,
-            email: appointment.email
+            name: appointment.patient.name,
+            phone: appointment.patient.phone,
+            email: appointment.patient.email
         }
 
         const row = createPatientRow(

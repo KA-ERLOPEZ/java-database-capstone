@@ -144,7 +144,7 @@ public class PatientService {
             return ResponseEntity.ok(Map.of("Appointments", appointments));
         } catch (Exception e) {
             // TODO: handle exception
-            return new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
