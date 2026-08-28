@@ -51,6 +51,10 @@ todayButton.addEventListener('click', () => {
     - Reload the appointments for that specific date
 */
 datePicker.addEventListener('change', () => {
+    if (!datePicker.value) {
+        console.log("Fecha vacía, cancelando");
+        return;
+    }
     selectedDate = datePicker.value;
     console.log(selectedDate);
     loadAppointments();
@@ -64,6 +68,8 @@ datePicker.addEventListener('change', () => {
 */
 async function loadAppointments() {
     try {
+        console.log("loadAppointments -> selectedDate:", selectedDate);
+        console.trace();
         const response = await getAllAppointments(selectedDate, patientName, token);
         patientTableBody.innerHTML = "";
 
