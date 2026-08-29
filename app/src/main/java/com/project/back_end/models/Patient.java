@@ -26,7 +26,7 @@ public class Patient {
     @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @Pattern(regexp = "\\d{10}")
+    @Size(min = 10, max = 20)
     @NotNull
     private String phone;
 

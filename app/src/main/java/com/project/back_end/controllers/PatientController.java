@@ -63,7 +63,7 @@ public class PatientController {
     // - First checks if the patient already exists using the shared service.
     // - If validation passes, attempts to create the patient and returns success or
     // error messages based on the outcome.
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<?> createPatient(@RequestBody Patient patient){
 
        boolean isValidPatient =  service.validatePatient(patient);

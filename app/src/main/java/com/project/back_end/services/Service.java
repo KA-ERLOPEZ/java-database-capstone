@@ -148,7 +148,7 @@ public class Service {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("Doctors", doctors);
+        response.put("doctors", doctors);
         return response;
 
     }

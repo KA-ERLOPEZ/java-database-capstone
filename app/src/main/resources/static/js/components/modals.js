@@ -89,7 +89,7 @@ export function openModal(type) {
   }
 
   if (type === "patientLogin") {
-    document.getElementById("loginBtn").addEventListener("click", loginPatient);
+    document.getElementById("loginBtn").addEventListener("click", patientLoginHandler);
   }
 
   if (type === 'addDoctor') {

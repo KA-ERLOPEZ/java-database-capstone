@@ -96,7 +96,7 @@ window.patientLoginHandler = async function () {
 
     const patientCredentials = { email, password };
     try {
-        const response = await fetch(PATIENT_API, {
+        const response = await fetch(PATIENT_API+'/login', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -112,7 +112,7 @@ window.patientLoginHandler = async function () {
             selectRole('patient')
 
         } else {
-            alert("Invalid doctor credentials.");
+            alert("Invalid pateint credentials.");
         }
     } catch (error) {
         console.error("Patient login error:", error);
