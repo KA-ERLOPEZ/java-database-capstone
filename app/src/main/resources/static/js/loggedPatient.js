@@ -105,10 +105,12 @@ function filterDoctorsOnChange() {
   const name = searchBar.length > 0 ? searchBar : null;
   const time = filterTime.length > 0 ? filterTime : null;
   const specialty = filterSpecialty.length > 0 ? filterSpecialty : null;
+  
+  const filters = {name, time, specialty}
 
-  filterDoctors(name, time, specialty)
+  filterDoctors(filters)
     .then(response => {
-      const doctors = response;
+      const doctors = response.doctors;
       const contentDiv = document.getElementById("content");
       contentDiv.innerHTML = "";
 

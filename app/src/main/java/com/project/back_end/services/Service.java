@@ -72,7 +72,7 @@ public class Service {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
-        response.put("Success", "Valid token");
+        response.put("message", "Valid token");
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }

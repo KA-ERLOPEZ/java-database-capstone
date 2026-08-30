@@ -89,7 +89,7 @@ async function filterDoctorsOnChange() {
         const time = filterTime?.value || null;
         const specialty = filterSpecialty?.value || null;
         const token = localStorage.getItem('token');
-        const doctors = await filterDoctors({ name, time, specialty }, token);
+        const doctors = await filterDoctors({ name, time, specialty });
 
         const contentDiv = document.getElementById("content");
         content.innerHTML = "";

@@ -234,19 +234,24 @@ public class DoctorService {
     // - Instruction: Ensure proper filtering based on both the name and specialty
     // as well as the specified time period.
     public Map<String, Object> filterDoctorsByNameSpecialtyAndTime(String name, String specialty, String amOrPm) {
+        // 1. Limpiar cadenas "null" o vacías
+        String cleanName = (name != null && !name.trim().isEmpty() && !name.equalsIgnoreCase("null")) ? name : null;
+        String cleanSpecialty = (specialty != null && !specialty.trim().isEmpty()
+                && !specialty.equalsIgnoreCase("null")) ? specialty : null;
+        String cleanTime = (amOrPm != null && !amOrPm.trim().isEmpty() && !"null".equalsIgnoreCase(amOrPm)) ? amOrPm : null;
         // 1. Buscar doctores por nombre y especialidad en la Base de Datos
-        List<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
+        List<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(cleanName, cleanSpecialty);
 
         // 2. Filtrar en memoria según el bloque horario seleccionado (AM o PM)
-        List<Doctor> filteredDoctors = doctors.stream()
-                .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
-                .toList();
+        if (cleanTime != null) {
+            doctors= doctors.stream()
+                    .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
+                    .toList();
+        }
 
         // 3. Construir la respuesta estructurada en el mapa
         Map<String, Object> response = new HashMap<>();
-        response.put("doctors", filteredDoctors);
-        response.put("total", filteredDoctors.size());
-        response.put("timeSlotRequested", amOrPm);
+        response.put("doctors", doctors);
 
         return response;
     }
@@ -315,17 +320,16 @@ public class DoctorService {
     public Map<String, Object> filterDoctorByTimeAndSpecility(String specialty, String amOrPm) {
         // 1. Buscar doctores por especialidad en la Base de Datos
         List<Doctor> doctors = doctorRepository.findBySpecialtyIgnoreCase(specialty);
-    
+
         // 2. Filtrar en memoria según el bloque horario (AM o PM)
         List<Doctor> filteredDoctors = doctors.stream()
                 .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
                 .toList();
-    
+
         // 3. Construir el mapa de retorno con los resultados
         Map<String, Object> response = new HashMap<>();
         response.put("doctors", filteredDoctors);
 
-    
         return response;
     }
 
@@ -338,21 +342,19 @@ public class DoctorService {
     public Map<String, Object> filterDoctorBySpecialty(String specialty) {
 
         Map<String, Object> response = new HashMap<>();
-    
-        String normalizedSpecialty =
-                specialty == null ? "" : specialty.trim();
-    
-        List<Doctor> doctors =
-                doctorRepository.findBySpecialtyIgnoreCase(normalizedSpecialty);
-    
+
+        String normalizedSpecialty = specialty == null ? "" : specialty.trim();
+
+        List<Doctor> doctors = doctorRepository.findBySpecialtyIgnoreCase(normalizedSpecialty);
+
         if (doctors.isEmpty()) {
             response.put("Message", "No doctors found for this specialty.");
             response.put("Doctors", doctors);
             return response;
         }
-    
+
         response.put("Doctors", doctors);
-    
+
         return response;
     }
 
@@ -365,16 +367,16 @@ public class DoctorService {
     public Map<String, Object> filterDoctorsByTime(String amOrPm) {
         // 1. Obtener todos los doctores de la Base de Datos
         List<Doctor> doctors = doctorRepository.findAll();
-    
+
         // 2. Filtrar en memoria según el bloque horario (AM o PM)
         List<Doctor> filteredDoctors = doctors.stream()
                 .filter(doctor -> matchesTimeSlot(doctor, amOrPm))
                 .toList();
-    
+
         // 3. Construir el mapa de retorno con los resultados
         Map<String, Object> response = new HashMap<>();
         response.put("doctors", filteredDoctors);
-    
+
         return response;
     }
 
@@ -394,7 +396,8 @@ public class DoctorService {
             return false;
         }
 
-        return availableTimes.stream().anyMatch(time -> {
+
+        return availableTimes.stream().map(availableTime -> availableTime.trim().substring(0, 5)).anyMatch(time -> {
             // Comparamos el formato "HH:mm" contra las 12:00 para determinar AM/PM
             boolean isAmTime = time.compareTo("12:00") < 0;
 

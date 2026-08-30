@@ -134,19 +134,14 @@ Check if the response is OK
 
 Catch any other errors, alert the user, and return a default empty result
 */
-async function filterDoctors(filters = {}, token) {
+async function filterDoctors(filters = {}) {
 
     const params = new URLSearchParams(filters).toString();
-    const urlWithParams = params ? `${DOCTOR_API}?${params}` : DOCTOR_API;
+    const urlWithParams =  `${DOCTOR_API}/filter?${params}`;
+    console.log(urlWithParams);
 
     try {
-        const response = await fetch(urlWithParams, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-type': 'application/json'
-            }
-        });
+        const response = await fetch(urlWithParams);
         if (response.ok) {
             return await response.json();
         }

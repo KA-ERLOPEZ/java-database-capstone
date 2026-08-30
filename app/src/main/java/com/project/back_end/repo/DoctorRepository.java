@@ -50,6 +50,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     // - Return type: List<Doctor>
     // - Parameters: String name, String specialty
 
+    @Query("SELECT DISTINCT d FROM Doctor d " +
+       "LEFT JOIN FETCH d.availableTimes WHERE " +
+       "(:name IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+       "(:specialty IS NULL OR LOWER(d.specialty) = LOWER(:specialty))")
     List<Doctor> findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(
             String name,
             String specialty);
