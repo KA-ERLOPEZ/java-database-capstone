@@ -51,11 +51,19 @@
             <div id="footer"></div>
         </div>
     </div>
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <div id="modal-body"></div>
+     <div id="modal-overlay" class="modal-overlay hidden">
+
+        <div id="modal" class="modal">
+
+            <button id="close-modal" class="close-btn">
+                &times;
+            </button>
+
+            <!-- Dynamic Modal Content -->
+            <div id="modal-content"></div>
+
         </div>
+
     </div>
     <script type="module" src="../js/patientDashboard.js" defer></script>
 </body>

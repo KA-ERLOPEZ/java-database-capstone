@@ -1,5 +1,5 @@
 // header.js
-
+//import { openModal } from "./modals";
 function renderHeader() {
     const headerDiv = document.getElementById("header");
 
@@ -94,10 +94,10 @@ function renderHeader() {
 
     headerDiv.innerHTML = headerContent;
 
-    attachHeaderButtonListeners();
+    //attachHeaderButtonListeners();
 }
 
-function attachHeaderButtonListeners() {
+/*function attachHeaderButtonListeners() {
     const patientLogin = document.getElementById("patientLogin");
     const patientSignup = document.getElementById("patientSignup");
 
@@ -112,7 +112,7 @@ function attachHeaderButtonListeners() {
             openModal("patientSignup");
         });
     }
-}
+}*/
 
 function logout() {
     localStorage.removeItem("userRole");

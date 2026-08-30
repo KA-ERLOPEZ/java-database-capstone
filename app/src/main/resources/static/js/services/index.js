@@ -25,7 +25,8 @@ window.onload = function () {
 
     if (patientBtn) {
         patientBtn.addEventListener('click', () => {
-            openModal('patientLogin')
+            //openModal('patientLogin')
+            selectRole('patient');
         })
     }
 };
@@ -90,7 +91,7 @@ window.doctorLoginHandler = async function () {
     }
 }
 
-window.patientLoginHandler = async function () {
+/*window.patientLoginHandler = async function () {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -118,7 +119,7 @@ window.patientLoginHandler = async function () {
         console.error("Patient login error:", error);
         alert("Something went wrong. Please try again.");
     }
-}
+}*/
 
 
 

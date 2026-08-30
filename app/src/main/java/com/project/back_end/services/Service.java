@@ -142,7 +142,7 @@ public class Service {
 
         // Si NO hay filtros activos, devolver todos. Si hay al menos 1, filtrar.
         if (activeFilters == 0) {
-            doctors = doctorRepository.findAll(); // Usando el Join Fetch
+            doctors = doctorRepository.findAll(); 
         } else {
             doctors = doctorRepository.findByDynamicFilters(cleanName, cleanSpecialty, cleanTime);
         }

@@ -223,7 +223,7 @@ public class DoctorService {
 
     public Map<String, Object> findDoctorByName(String name) {
         List<Doctor> doctors = doctorRepository.findByNameLike(name);
-        return Map.of("Doctors", doctors);
+        return Map.of("doctors", doctors);
     }
 
     // 11. **filterDoctorsByNameSpecilityandTime Method**:
