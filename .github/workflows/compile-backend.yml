@@ -1,0 +1,23 @@
+name: Build Backend
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-backend:
+    name: Compilar Backend
+    runs-on: ubuntu-lastest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Conpilar proyecto Maven 
+        working-directory: app 
+        run: mvn clean compile
