@@ -1,12 +1,12 @@
-name: Lint Dokerfile
+name: Lint Dockerfile
 
 on:
   push:
   pull_request:
 
 jobs:
-  lint-dokerfile:
-    name: Lint DokerFiles
+  lint-dockerfile:
+    name: Lint Dockerfiles
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
