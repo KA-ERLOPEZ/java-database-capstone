@@ -1,0 +1,18 @@
+name: Lint Docker
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-docker:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: app/Dockerfile
+
+    
